@@ -1,0 +1,812 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Create Account - HybridCloud{% endblock %}
+
+{% block body %}
+<style>
+    .register-container {
+        min-height: calc(100vh - 150px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .register-card {
+        background: rgba(10, 15, 31, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 700px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    .register-header {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2));
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(147, 51, 234, 0.3);
+    }
+    
+    .register-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #9333ea, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+    
+    .register-body {
+        padding: 2.5rem 2rem;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #9333ea;
+        font-weight: 500;
+    }
+    
+    .form-group label .required {
+        color: #dc3545;
+        margin-left: 4px;
+    }
+    
+    .form-control {
+        background: rgba(147, 51, 234, 0.1);
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        background: rgba(147, 51, 234, 0.15);
+        border-color: #9333ea;
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2);
+        color: white;
+        outline: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background: rgba(220, 53, 69, 0.1);
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+    }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .error-message.show {
+        display: block;
+    }
+    
+    .success-message {
+        color: #28a745;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .success-message.show {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .radio-group {
+        display: flex;
+        gap: 2rem;
+        padding: 0.5rem 0;
+    }
+    
+    .custom-radio {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+    }
+    
+    .custom-radio input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #9333ea;
+        cursor: pointer;
+    }
+    
+    .radio-error {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+        display: none;
+    }
+    
+    .radio-error.show {
+        display: block;
+    }
+    
+    .btn-register {
+        width: 100%;
+        background: linear-gradient(135deg, #9333ea, #ec4899);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .btn-register:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(147, 51, 234, 0.3);
+    }
+    
+    .btn-register:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .login-link a {
+        color: #9333ea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .login-link a:hover {
+        color: #ec4899;
+    }
+    
+    .password-strength {
+        height: 5px;
+        background: rgba(147, 51, 234, 0.1);
+        border-radius: 5px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .strength-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-weak { background: #dc3545; width: 25%; }
+    .strength-medium { background: #ffc107; width: 50%; }
+    .strength-strong { background: #28a745; width: 75%; }
+    .strength-very-strong { background: #9333ea; width: 100%; }
+    
+    .password-requirements {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .requirement {
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .requirement.met {
+        color: #28a745;
+    }
+    
+    .requirement i {
+        font-size: 0.9rem;
+    }
+    
+    .alert-custom {
+        background: rgba(220, 53, 69, 0.15);
+        border-left: 4px solid #dc3545;
+        color: #f8d7da;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease;
+    }
+    
+    .alert-custom.success {
+        background: rgba(40, 167, 69, 0.15);
+        border-left: 4px solid #28a745;
+        color: #d4edda;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="register-container">
+        <div class="register-card" data-aos="fade-up">
+            <div class="register-header">
+                <h2>Create Account</h2>
+                <p class="text-white-50 mt-2">Join HybridCloud today</p>
+            </div>
+            
+            <div class="register-body">
+                {% if msg %}
+                    <div class="alert-custom {% if 'Success' in msg %}success{% endif %}">
+                        <i class="bi bi-{% if 'Success' in msg %}check-circle{% else %}exclamation-triangle{% endif %}-fill me-2"></i>
+                        {{ msg }}
+                    </div>
+                {% endif %}
+                
+                <form method="post" action="{% url 'user_details_add' %}" id="registerForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fname">First Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="fname" name="fname" 
+                                   placeholder="Enter first name" required>
+                            <div class="error-message" id="fnameError"></div>
+                            <small class="success-message" id="fnameSuccess">✓ Valid first name</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lname">Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="lname" name="lname" 
+                                   placeholder="Enter last name" required>
+                            <div class="error-message" id="lnameError"></div>
+                            <small class="success-message" id="lnameSuccess">✓ Valid last name</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Gender <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <label class="custom-radio">
+                                    <input type="radio" name="gender" value="Male" id="genderMale">
+                                    <span>Male</span>
+                                </label>
+                                <label class="custom-radio">
+                                    <input type="radio" name="gender" value="Female" id="genderFemale">
+                                    <span>Female</span>
+                                </label>
+                            </div>
+                            <div class="radio-error" id="genderError">Please select your gender</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age">Date of Birth <span class="required">*</span></label>
+                            <input type="date" class="form-control" id="age" name="age" required>
+                            <div class="error-message" id="ageError"></div>
+                            <small class="success-message" id="ageSuccess">✓ Valid date of birth</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="addr">Address <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="addr" name="addr" 
+                               placeholder="Street address" required>
+                        <div class="error-message" id="addrError">Address is required</div>
+                        <small class="success-message" id="addrSuccess">✓ Address provided</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pin">PIN Code <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="pin" name="pin" 
+                                   placeholder="6-digit PIN code" maxlength="6" required>
+                            <div class="error-message" id="pinError"></div>
+                            <small class="success-message" id="pinSuccess">✓ Valid PIN code</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact">Contact <span class="required">*</span></label>
+                            <input type="tel" class="form-control" id="contact" name="contact" 
+                                   placeholder="10-digit mobile number" maxlength="10" required>
+                            <div class="error-message" id="contactError"></div>
+                            <small class="success-message" id="contactSuccess">✓ Valid phone number</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               placeholder="your@email.com" required>
+                        <small class="text-white-50">This will be your username</small>
+                        <div class="error-message" id="emailError"></div>
+                        <small class="success-message" id="emailSuccess">✓ Valid email format</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pwd">Password <span class="required">*</span></label>
+                        <input type="password" class="form-control" id="pwd" name="pwd" required>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="password-requirements">
+                            <div class="requirement" id="reqLength">
+                                <i class="bi bi-circle"></i> At least 8 characters
+                            </div>
+                            <div class="requirement" id="reqUppercase">
+                                <i class="bi bi-circle"></i> At least one uppercase letter
+                            </div>
+                            <div class="requirement" id="reqLowercase">
+                                <i class="bi bi-circle"></i> At least one lowercase letter
+                            </div>
+                            <div class="requirement" id="reqNumber">
+                                <i class="bi bi-circle"></i> At least one number
+                            </div>
+                            <div class="requirement" id="reqSpecial">
+                                <i class="bi bi-circle"></i> At least one special character
+                            </div>
+                        </div>
+                        <div class="error-message" id="pwdError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_pwd">Confirm Password <span class="required">*</span></label>
+                        <input type="password" class="form-control" id="confirm_pwd" required>
+                        <div class="error-message" id="confirmPwdError"></div>
+                        <small class="success-message" id="confirmPwdSuccess">✓ Passwords match</small>
+                    </div>
+                    
+                    <button type="submit" class="btn-register" id="submitBtn" disabled>
+                        <span class="normal-state">
+                            <i class="bi bi-person-plus-fill me-2"></i>Create Account
+                        </span>
+                        <span class="loading-state d-none">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Creating Account...
+                        </span>
+                    </button>
+                </form>
+                
+                <div class="login-link">
+                    Already have an account? <a href="{% url 'user_login' %}">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get all form elements
+    const fname = document.getElementById('fname');
+    const lname = document.getElementById('lname');
+    const genderMale = document.getElementById('genderMale');
+    const genderFemale = document.getElementById('genderFemale');
+    const age = document.getElementById('age');
+    const addr = document.getElementById('addr');
+    const pin = document.getElementById('pin');
+    const contact = document.getElementById('contact');
+    const email = document.getElementById('email');
+    const password = document.getElementById('pwd');
+    const confirmPassword = document.getElementById('confirm_pwd');
+    
+    // Get all error and success message elements
+    const fnameError = document.getElementById('fnameError');
+    const fnameSuccess = document.getElementById('fnameSuccess');
+    const lnameError = document.getElementById('lnameError');
+    const lnameSuccess = document.getElementById('lnameSuccess');
+    const genderError = document.getElementById('genderError');
+    const ageError = document.getElementById('ageError');
+    const ageSuccess = document.getElementById('ageSuccess');
+    const addrError = document.getElementById('addrError');
+    const addrSuccess = document.getElementById('addrSuccess');
+    const pinError = document.getElementById('pinError');
+    const pinSuccess = document.getElementById('pinSuccess');
+    const contactError = document.getElementById('contactError');
+    const contactSuccess = document.getElementById('contactSuccess');
+    const emailError = document.getElementById('emailError');
+    const emailSuccess = document.getElementById('emailSuccess');
+    const pwdError = document.getElementById('pwdError');
+    const confirmPwdError = document.getElementById('confirmPwdError');
+    const confirmPwdSuccess = document.getElementById('confirmPwdSuccess');
+    
+    // Password requirement elements
+    const reqLength = document.getElementById('reqLength');
+    const reqUppercase = document.getElementById('reqUppercase');
+    const reqLowercase = document.getElementById('reqLowercase');
+    const reqNumber = document.getElementById('reqNumber');
+    const reqSpecial = document.getElementById('reqSpecial');
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const strengthBar = document.getElementById('strengthBar');
+
+    // Validation functions
+    function validateName(name, field) {
+        if (!name || name.trim().length === 0) {
+            return { valid: false, message: `${field} is required` };
+        }
+        if (name.trim().length < 3) {
+            return { valid: false, message: `${field} must be at least 3 characters` };
+        }
+        if (!/^[A-Za-z]+$/.test(name.trim())) {
+            return { valid: false, message: `${field} must contain only letters` };
+        }
+        return { valid: true, message: '' };
+    }
+
+    function validateGender() {
+        return genderMale.checked || genderFemale.checked;
+    }
+
+    function validateAge(dob) {
+        if (!dob) {
+            return { valid: false, message: 'Date of birth is required' };
+        }
+        const birthDate = new Date(dob);
+        const today = new Date();
+        
+        if (birthDate > today) {
+            return { valid: false, message: 'Date of birth cannot be in the future' };
+        }
+        
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        if (age < 13) {
+            return { valid: false, message: 'You must be at least 13 years old' };
+        }
+        
+        return { valid: true, message: '' };
+    }
+
+    function validateAddress(address) {
+        if (!address || address.trim().length === 0) {
+            return { valid: false, message: 'Address is required' };
+        }
+        if (address.trim().length < 5) {
+            return { valid: false, message: 'Please enter a complete address' };
+        }
+        return { valid: true, message: '' };
+    }
+
+    function validatePIN(pinCode) {
+        if (!pinCode || pinCode.trim().length === 0) {
+            return { valid: false, message: 'PIN code is required' };
+        }
+        if (!/^\d{6}$/.test(pinCode.trim())) {
+            return { valid: false, message: 'PIN code must be exactly 6 digits' };
+        }
+        return { valid: true, message: '' };
+    }
+
+    function validateContact(phone) {
+        if (!phone || phone.trim().length === 0) {
+            return { valid: false, message: 'Contact number is required' };
+        }
+        if (!/^\d{10}$/.test(phone.trim())) {
+            return { valid: false, message: 'Contact number must be exactly 10 digits' };
+        }
+        if (/^0+$/.test(phone.trim())) {
+            return { valid: false, message: 'Contact number cannot be all zeros' };
+        }
+        return { valid: true, message: '' };
+    }
+
+    function validateEmail(emailAddr) {
+        if (!emailAddr || emailAddr.trim().length === 0) {
+            return { valid: false, message: 'Email is required' };
+        }
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(emailAddr.trim())) {
+            return { valid: false, message: 'Please enter a valid email address (e.g., name@domain.com)' };
+        }
+        return { valid: true, message: '' };
+    }
+
+    function validatePassword(pwd) {
+        const requirements = {
+            length: pwd.length >= 8,
+            uppercase: /[A-Z]/.test(pwd),
+            lowercase: /[a-z]/.test(pwd),
+            number: /[0-9]/.test(pwd),
+            special: /[^A-Za-z0-9]/.test(pwd)
+        };
+        
+        // Update requirement indicators
+        reqLength.className = requirements.length ? 'requirement met' : 'requirement';
+        reqUppercase.className = requirements.uppercase ? 'requirement met' : 'requirement';
+        reqLowercase.className = requirements.lowercase ? 'requirement met' : 'requirement';
+        reqNumber.className = requirements.number ? 'requirement met' : 'requirement';
+        reqSpecial.className = requirements.special ? 'requirement met' : 'requirement';
+        
+        reqLength.innerHTML = `<i class="bi bi-${requirements.length ? 'check-circle-fill' : 'circle'}"></i> At least 8 characters`;
+        reqUppercase.innerHTML = `<i class="bi bi-${requirements.uppercase ? 'check-circle-fill' : 'circle'}"></i> At least one uppercase letter`;
+        reqLowercase.innerHTML = `<i class="bi bi-${requirements.lowercase ? 'check-circle-fill' : 'circle'}"></i> At least one lowercase letter`;
+        reqNumber.innerHTML = `<i class="bi bi-${requirements.number ? 'check-circle-fill' : 'circle'}"></i> At least one number`;
+        reqSpecial.innerHTML = `<i class="bi bi-${requirements.special ? 'check-circle-fill' : 'circle'}"></i> At least one special character`;
+        
+        const allMet = Object.values(requirements).every(Boolean);
+        
+        // Calculate password strength
+        let strength = Object.values(requirements).filter(Boolean).length;
+        strengthBar.className = 'strength-bar';
+        if (strength <= 1) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength <= 2) {
+            strengthBar.classList.add('strength-medium');
+        } else if (strength <= 3) {
+            strengthBar.classList.add('strength-strong');
+        } else {
+            strengthBar.classList.add('strength-very-strong');
+        }
+        
+        return allMet;
+    }
+
+    function validateConfirmPassword() {
+        if (!confirmPassword.value) {
+            return { valid: false, message: 'Please confirm your password' };
+        }
+        if (password.value !== confirmPassword.value) {
+            return { valid: false, message: 'Passwords do not match' };
+        }
+        return { valid: true, message: '' };
+    }
+
+    // Real-time validation
+    fname.addEventListener('input', function() {
+        const result = validateName(this.value, 'First name');
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        fnameError.classList.toggle('show', !result.valid);
+        fnameError.textContent = result.message;
+        fnameSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    lname.addEventListener('input', function() {
+        const result = validateName(this.value, 'Last name');
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        lnameError.classList.toggle('show', !result.valid);
+        lnameError.textContent = result.message;
+        lnameSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    [genderMale, genderFemale].forEach(radio => {
+        radio.addEventListener('change', function() {
+            genderError.classList.remove('show');
+            validateAllFields();
+        });
+    });
+
+    age.addEventListener('input', function() {
+        const result = validateAge(this.value);
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        ageError.classList.toggle('show', !result.valid);
+        ageError.textContent = result.message;
+        ageSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    addr.addEventListener('input', function() {
+        const result = validateAddress(this.value);
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        addrError.classList.toggle('show', !result.valid);
+        addrSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    pin.addEventListener('input', function() {
+        // Allow only digits
+        this.value = this.value.replace(/[^0-9]/g, '');
+        const result = validatePIN(this.value);
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        pinError.classList.toggle('show', !result.valid);
+        pinError.textContent = result.message;
+        pinSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    contact.addEventListener('input', function() {
+        // Allow only digits
+        this.value = this.value.replace(/[^0-9]/g, '');
+        const result = validateContact(this.value);
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        contactError.classList.toggle('show', !result.valid);
+        contactError.textContent = result.message;
+        contactSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    email.addEventListener('input', function() {
+        const result = validateEmail(this.value);
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        emailError.classList.toggle('show', !result.valid);
+        emailError.textContent = result.message;
+        emailSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    password.addEventListener('input', function() {
+        const isValid = validatePassword(this.value);
+        this.classList.toggle('is-invalid', !isValid);
+        this.classList.toggle('is-valid', isValid);
+        pwdError.classList.toggle('show', !isValid);
+        pwdError.textContent = isValid ? '' : 'Please meet all password requirements';
+        
+        // Also validate confirm password if it has value
+        if (confirmPassword.value) {
+            const confirmResult = validateConfirmPassword();
+            confirmPassword.classList.toggle('is-invalid', !confirmResult.valid);
+            confirmPassword.classList.toggle('is-valid', confirmResult.valid);
+            confirmPwdError.classList.toggle('show', !confirmResult.valid);
+            confirmPwdError.textContent = confirmResult.message;
+            confirmPwdSuccess.classList.toggle('show', confirmResult.valid);
+        }
+        
+        validateAllFields();
+    });
+
+    confirmPassword.addEventListener('input', function() {
+        const result = validateConfirmPassword();
+        this.classList.toggle('is-invalid', !result.valid);
+        this.classList.toggle('is-valid', result.valid);
+        confirmPwdError.classList.toggle('show', !result.valid);
+        confirmPwdError.textContent = result.message;
+        confirmPwdSuccess.classList.toggle('show', result.valid);
+        validateAllFields();
+    });
+
+    function validateAllFields() {
+        const isFnameValid = validateName(fname.value, 'First name').valid;
+        const isLnameValid = validateName(lname.value, 'Last name').valid;
+        const isGenderValid = validateGender();
+        const isAgeValid = validateAge(age.value).valid;
+        const isAddrValid = validateAddress(addr.value).valid;
+        const isPinValid = validatePIN(pin.value).valid;
+        const isContactValid = validateContact(contact.value).valid;
+        const isEmailValid = validateEmail(email.value).valid;
+        const isPasswordValid = validatePassword(password.value);
+        const isConfirmValid = validateConfirmPassword().valid;
+        
+        const allValid = isFnameValid && isLnameValid && isGenderValid && isAgeValid && 
+                        isAddrValid && isPinValid && isContactValid && isEmailValid && 
+                        isPasswordValid && isConfirmValid;
+        
+        submitBtn.disabled = !allValid;
+        
+        // Update gender error
+        if (!isGenderValid) {
+            genderError.classList.add('show');
+        } else {
+            genderError.classList.remove('show');
+        }
+    }
+
+    // Form submission
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        validateAllFields();
+        
+        if (submitBtn.disabled) {
+            e.preventDefault();
+            
+            // Show all errors for empty fields
+            if (!fname.value) {
+                fname.classList.add('is-invalid');
+                fnameError.classList.add('show');
+                fnameError.textContent = 'First name is required';
+            }
+            if (!lname.value) {
+                lname.classList.add('is-invalid');
+                lnameError.classList.add('show');
+                lnameError.textContent = 'Last name is required';
+            }
+            if (!age.value) {
+                age.classList.add('is-invalid');
+                ageError.classList.add('show');
+                ageError.textContent = 'Date of birth is required';
+            }
+            if (!addr.value) {
+                addr.classList.add('is-invalid');
+                addrError.classList.add('show');
+            }
+            if (!pin.value) {
+                pin.classList.add('is-invalid');
+                pinError.classList.add('show');
+                pinError.textContent = 'PIN code is required';
+            }
+            if (!contact.value) {
+                contact.classList.add('is-invalid');
+                contactError.classList.add('show');
+                contactError.textContent = 'Contact number is required';
+            }
+            if (!email.value) {
+                email.classList.add('is-invalid');
+                emailError.classList.add('show');
+                emailError.textContent = 'Email is required';
+            }
+            if (!password.value) {
+                password.classList.add('is-invalid');
+                pwdError.classList.add('show');
+                pwdError.textContent = 'Password is required';
+            }
+            if (!confirmPassword.value) {
+                confirmPassword.classList.add('is-invalid');
+                confirmPwdError.classList.add('show');
+                confirmPwdError.textContent = 'Please confirm your password';
+            }
+            
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.querySelector('.normal-state').classList.add('d-none');
+        submitBtn.querySelector('.loading-state').classList.remove('d-none');
+    });
+
+    // Initial validation check
+    validateAllFields();
+
+    // Prevent non-digit input for PIN and Contact
+    [pin, contact].forEach(field => {
+        field.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

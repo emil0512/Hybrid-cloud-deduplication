@@ -1,0 +1,238 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Create Support Ticket{% endblock %}
+
+{% block body %}
+<style>
+    .create-ticket-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .ticket-form-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #9333ea;
+        font-weight: 500;
+    }
+    
+    .form-control, .form-select {
+        width: 100%;
+        background: rgba(147, 51, 234, 0.1);
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        color: white;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #9333ea;
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2);
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .form-select option {
+        background: #0a0f1f;
+        color: white;
+    }
+    
+    .char-counter {
+        text-align: right;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 0.5rem;
+    }
+    
+    .priority-options {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .priority-option {
+        flex: 1;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .priority-option:hover {
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .priority-option.selected {
+        border-color: #9333ea;
+        background: rgba(147, 51, 234, 0.2);
+    }
+    
+    .priority-option.low.selected { border-color: #28a745; }
+    .priority-option.medium.selected { border-color: #ffc107; }
+    .priority-option.high.selected { border-color: #dc3545; }
+    
+    .info-box {
+        background: rgba(147, 51, 234, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .info-box i {
+        color: #9333ea;
+        margin-right: 0.5rem;
+    }
+</style>
+
+<div class="container">
+    <div class="create-ticket-container">
+        <h2 class="mb-4 text-center" data-aos="fade-up">
+            <i class="bi bi-ticket-fill me-2 text-primary"></i>Create Support Ticket
+        </h2>
+        
+        <div class="ticket-form-card" data-aos="fade-up">
+            <form method="post" action="{% url 'user_create_ticket' %}" id="ticketForm">
+                {% csrf_token %}
+                
+                <!-- Issue Type -->
+                <div class="form-group">
+                    <label for="issue_type">
+                        <i class="bi bi-tag me-1 text-primary"></i>Issue Type
+                    </label>
+                    <select class="form-select" id="issue_type" name="issue_type" required>
+                        <option value="" disabled selected>Select issue type</option>
+                        <option value="technical">Technical Issue</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="account">Account Management</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <!-- Subject -->
+                <div class="form-group">
+                    <label for="subject">
+                        <i class="bi bi-heading me-1 text-primary"></i>Subject
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="subject" 
+                           name="subject" 
+                           placeholder="Brief summary of your issue"
+                           maxlength="100"
+                           required>
+                </div>
+                
+                <!-- Message -->
+                <div class="form-group">
+                    <label for="message">
+                        <i class="bi bi-chat-dots me-1 text-primary"></i>Message
+                    </label>
+                    <textarea class="form-control" 
+                              id="message" 
+                              name="message" 
+                              rows="6" 
+                              placeholder="Describe your issue in detail..."
+                              maxlength="1000"
+                              required></textarea>
+                    <div class="char-counter" id="charCounter">0/1000 characters</div>
+                </div>
+                
+                <!-- Priority -->
+                <div class="form-group">
+                    <label>
+                        <i class="bi bi-exclamation-triangle me-1 text-primary"></i>Priority
+                    </label>
+                    <input type="hidden" name="priority" id="priority" value="medium">
+                    <div class="priority-options">
+                        <div class="priority-option low" onclick="selectPriority('low')">
+                            <i class="bi bi-arrow-down"></i>
+                            <div>Low</div>
+                        </div>
+                        <div class="priority-option medium selected" onclick="selectPriority('medium')">
+                            <i class="bi bi-dash"></i>
+                            <div>Medium</div>
+                        </div>
+                        <div class="priority-option high" onclick="selectPriority('high')">
+                            <i class="bi bi-arrow-up"></i>
+                            <div>High</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Box -->
+                <div class="info-box">
+                    <i class="bi bi-info-circle"></i>
+                    Our support team will respond to your ticket within 24-48 hours.
+                </div>
+                
+                <!-- Form Buttons -->
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-send me-2"></i>Submit Ticket
+                    </button>
+                    <a href="{% url 'user_tickets' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mt-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character counter
+    const messageInput = document.getElementById('message');
+    const charCounter = document.getElementById('charCounter');
+    
+    messageInput.addEventListener('input', function() {
+        const length = this.value.length;
+        charCounter.textContent = length + '/1000 characters';
+    });
+    
+    // Priority selection
+    function selectPriority(priority) {
+        document.getElementById('priority').value = priority;
+        
+        document.querySelectorAll('.priority-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        document.querySelector(`.priority-option.${priority}`).classList.add('selected');
+    }
+    
+    // Form submission
+    document.getElementById('ticketForm').addEventListener('submit', function() {
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+    });
+</script>
+{% endblock %}

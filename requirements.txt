@@ -1,0 +1,4 @@
+django
+pyocclient
+python-magic>=0.4.24
+python-magic-bin>=0.4.14; platform_system=="Windows"

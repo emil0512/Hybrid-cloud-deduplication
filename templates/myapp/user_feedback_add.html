@@ -1,0 +1,116 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Submit Feedback{% endblock %}
+
+{% block body %}
+<style>
+    .feedback-form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .feedback-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .char-counter {
+        text-align: right;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 0.5rem;
+    }
+    
+    .char-counter.warning {
+        color: #ffc107;
+    }
+    
+    .char-counter.danger {
+        color: #dc3545;
+    }
+</style>
+
+<div class="container">
+    <div class="feedback-form-container">
+        <h2 class="mb-4 text-center" data-aos="fade-up">
+            <i class="bi bi-chat-dots-fill me-2 text-primary"></i>Submit Feedback
+        </h2>
+        
+        <div class="feedback-card" data-aos="fade-up">
+            <form method="post" action="{% url 'user_feedback_add' %}" id="feedbackForm">
+                {% csrf_token %}
+                
+                <div class="form-group mb-4">
+                    <label for="msg" class="mb-2">
+                        <i class="bi bi-pencil me-1 text-primary"></i>Your Message
+                    </label>
+                    <textarea class="form-control" 
+                              id="msg" 
+                              name="msg" 
+                              rows="6" 
+                              placeholder="Write your feedback here..."
+                              maxlength="500"
+                              required></textarea>
+                    <div class="char-counter" id="charCounter">0/500 characters</div>
+                </div>
+                
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Your feedback helps us improve our service. Thank you for sharing!
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-send me-2"></i>Submit Feedback
+                    </button>
+                    <button type="reset" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Clear
+                    </button>
+                </div>
+            </form>
+            
+            {% if msg %}
+                <div class="alert alert-success mt-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {{ msg }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'user_feedback_view' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Feedback
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const textarea = document.getElementById('msg');
+    const charCounter = document.getElementById('charCounter');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    textarea.addEventListener('input', function() {
+        const length = this.value.length;
+        charCounter.textContent = length + '/500 characters';
+        
+        charCounter.classList.remove('warning', 'danger');
+        if (length > 400) {
+            charCounter.classList.add('warning');
+        }
+        if (length > 450) {
+            charCounter.classList.add('danger');
+        }
+    });
+    
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+    });
+</script>
+{% endblock %}

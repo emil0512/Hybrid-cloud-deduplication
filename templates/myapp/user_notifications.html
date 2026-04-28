@@ -1,0 +1,252 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block body %}
+<style>
+    .notifications-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .notification-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 16px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        cursor: pointer;
+    }
+    
+    .notification-card:hover {
+        transform: translateX(5px);
+        border-color: #9333ea;
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .notification-card.unread {
+        border-left: 4px solid #9333ea;
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+    
+    .notification-type {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .notification-type i {
+        font-size: 1.2rem;
+        color: #9333ea;
+    }
+    
+    .notification-type span {
+        font-weight: 600;
+    }
+    
+    .notification-time {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .notification-message {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0;
+        line-height: 1.6;
+    }
+    
+    .notification-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+    
+    .badge-ticket {
+        background: rgba(147, 51, 234, 0.2);
+        color: #9333ea;
+        border: 1px solid #9333ea;
+    }
+    
+    .badge-system {
+        background: rgba(23, 162, 184, 0.2);
+        color: #17a2b8;
+        border: 1px solid #17a2b8;
+    }
+    
+    .badge-feedback {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        color: rgba(147, 51, 234, 0.3);
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background: transparent;
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: rgba(147, 51, 234, 0.2);
+        border-color: #9333ea;
+        color: #fff;
+    }
+</style>
+
+<div class="container">
+    <div class="notifications-container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up">
+            <h2 class="mb-0">
+                <i class="bi bi-bell-fill me-2 text-primary"></i>Notifications
+            </h2>
+            <span class="badge bg-primary">{{ notifications.count }} Total</span>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar" data-aos="fade-up">
+            <button class="filter-btn active" onclick="filterNotifications('all')">All</button>
+            <button class="filter-btn" onclick="filterNotifications('unread')">Unread</button>
+            <button class="filter-btn" onclick="filterNotifications('ticket')">Tickets</button>
+            <button class="filter-btn" onclick="filterNotifications('system')">System</button>
+        </div>
+        
+        <!-- Notifications List -->
+        <div data-aos="fade-up">
+            {% if notifications %}
+                {% for notif in notifications %}
+                    <div class="notification-card {% if notif.status == 'unread' %}unread{% endif %}" 
+                         data-status="{{ notif.status }}"
+                         data-type="{% if notif.ticket_id %}ticket{% else %}system{% endif %}"
+                         onclick="markAsRead({{ notif.id }})">
+                        
+                        <div class="notification-header">
+                            <div class="notification-type">
+                                {% if notif.ticket_id %}
+                                    <i class="bi bi-ticket"></i>
+                                    <span>
+                                        Ticket #{{ notif.ticket_id }}
+                                        <span class="notification-badge badge-ticket">Support</span>
+                                    </span>
+                                {% else %}
+                                    <i class="bi bi-megaphone"></i>
+                                    <span>
+                                        System Update
+                                        <span class="notification-badge badge-system">System</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="notification-time">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ notif.created_at|date:"Y-m-d H:i" }}
+                            </div>
+                        </div>
+                        
+                        <p class="notification-message">
+                            {{ notif.message }}
+                        </p>
+                        
+                       {% if notif.ticket_id %}
+    <div class="mt-2">
+        {% url 'user_ticket_detail' notif.ticket_id as ticket_url %}
+        {% if ticket_url %}
+        <a href="{% url 'user_ticket_detail' notif.ticket_id %}" 
+           class="btn btn-sm btn-outline-primary"
+           onclick="event.stopPropagation()">
+            <i class="bi bi-eye me-1"></i>View Ticket
+        </a>
+        {% endif %}
+    </div>
+{% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-bell-slash"></i>
+                    <h4 class="text-white-50">No Notifications</h4>
+                    <p class="text-white-50">You're all caught up! Check back later for updates.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'user_home' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterNotifications(type) {
+        const notifications = document.querySelectorAll('.notification-card');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.toLowerCase().includes(type)) {
+                btn.classList.add('active');
+            }
+        });
+        
+        notifications.forEach(notif => {
+            if (type === 'all') {
+                notif.style.display = 'block';
+            } else if (type === 'unread') {
+                notif.style.display = notif.dataset.status === 'unread' ? 'block' : 'none';
+            } else {
+                notif.style.display = notif.dataset.type === type ? 'block' : 'none';
+            }
+        });
+    }
+    
+    function markAsRead(notificationId) {
+        fetch(`/mark-notification-read/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => {
+            const notif = event.currentTarget;
+            notif.classList.remove('unread');
+        });
+    }
+</script>
+{% endblock %}

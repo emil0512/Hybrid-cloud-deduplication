@@ -1,0 +1,386 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Support - Contact Admin{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h1 class="display-5 fw-bold mb-3">Need Help?</h1>
+                <p class="lead text-white-50">Contact the system administrator for assistance</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <span class="badge bg-primary">Response Time: 24-48 hours</span>
+                    <span class="badge bg-success">Admin Support</span>
+                </div>
+            </div>
+
+            <!-- Contact Admin Form -->
+            <div class="card bg-dark border-primary mb-4" data-aos="fade-up">
+                <div class="card-header bg-primary bg-opacity-10 border-primary text-white-50">
+                    <h5 class="mb-0"><i class="bi bi-envelope me-2 text-white-50"></i>Contact Admin Directly</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'contact' %}" id="contactForm">
+                        {% csrf_token %}
+                        
+                       <!-- Username Field -->
+<div class="mb-3">
+    <label class="form-label text-primary">
+        <i class="bi bi-person-circle me-1"></i>Username <span class="text-danger">*</span>
+    </label>
+    <input type="text" 
+           class="form-control bg-dark text-white border-primary" 
+           name="username" 
+           id="username"
+           placeholder="Enter your username" 
+           required>
+    <div id="usernameStatus" class="mt-1"></div>
+</div>
+                        
+                        <!-- Issue Type Field -->
+                        <div class="mb-3">
+                            <label class="form-label text-primary">Issue Type</label>
+                            <select class="form-select bg-dark text-white border-primary" name="issue_type" id="issue_type" required>
+                                <option value="" selected disabled>Select issue type</option>
+                                <option value="quota">📊 Storage Quota Increase</option>
+                                <option value="access">🔑 Login/Password Issue</option>
+                                <option value="upload">📤 File Upload Problem</option>
+                                <option value="download">📥 File Download Issue</option>
+                                <option value="delete">🗑️ File Deletion Request</option>
+                                <option value="account">👤 Account/Profile Update</option>
+                                <option value="feedback">💬 Feedback/Complaint</option>
+                                <option value="other">❓ Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Subject Field -->
+                        <div class="mb-3">
+                            <label class="form-label text-primary">Subject</label>
+                            <input type="text" class="form-control bg-dark text-white border-primary" name="subject" id="subject" 
+                                   placeholder="Brief summary of issue" required>
+                        </div>
+                        
+                        <!-- Message Field -->
+                        <div class="mb-3">
+                            <label class="form-label text-primary">Message</label>
+                            <textarea class="form-control bg-dark text-white border-primary" name="message" id="message" 
+                                      rows="5" placeholder="Describe your issue in detail..." required></textarea>
+                        </div>
+                        
+                        <!-- Priority Field -->
+                        <div class="mb-3">
+                            <label class="form-label text-primary">Priority</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priority" id="low" value="low" checked>
+                                    <label class="form-check-label text-white-50" for="low">Low</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priority" id="medium" value="medium">
+                                    <label class="form-check-label text-white-50" for="medium">Medium</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="priority" id="high" value="high">
+                                    <label class="form-check-label text-white-50" for="high">High</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-cyber-glow w-100 py-3" id="submitBtn">
+                            <i class="bi bi-send me-2"></i>Send to Admin
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOM MODAL - Pure CSS/JavaScript -->
+<div id="customModal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header" id="customModalHeader">
+            <h5 id="customModalTitle"></h5>
+            <button class="custom-modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="custom-modal-body" id="customModalBody">
+        </div>
+        <div class="custom-modal-footer">
+            <button class="custom-modal-btn" onclick="closeModal()" id="customModalButton">OK</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modal Styles */
+    .custom-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+    }
+    
+    .custom-modal-content {
+        background: #1a1a2e;
+        margin: 10% auto;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 15px;
+        border: 2px solid;
+        animation: modalSlide 0.3s ease;
+    }
+    
+    @keyframes modalSlide {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .custom-modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top-left-radius: 13px;
+        border-top-right-radius: 13px;
+    }
+    
+    .custom-modal-header h5 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .custom-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: white;
+        opacity: 0.7;
+        line-height: 1;
+        padding: 0;
+    }
+    
+    .custom-modal-close:hover {
+        opacity: 1;
+    }
+    
+    .custom-modal-body {
+        padding: 30px 20px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .custom-modal-body i {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+    
+    .custom-modal-body h4 {
+        color: white;
+        margin-bottom: 10px;
+    }
+    
+    .custom-modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid;
+        text-align: right;
+    }
+    
+    .custom-modal-btn {
+        padding: 8px 30px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+    
+    .custom-modal-btn:hover {
+        opacity: 0.8;
+    }
+    
+    /* Modal type styles */
+    .modal-danger .custom-modal-content {
+        border-color: #dc3545;
+    }
+    .modal-danger .custom-modal-header {
+        background: rgba(220, 53, 69, 0.2);
+        border-bottom-color: #dc3545;
+    }
+    .modal-danger .custom-modal-btn {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .modal-success .custom-modal-content {
+        border-color: #28a745;
+    }
+    .modal-success .custom-modal-header {
+        background: rgba(40, 167, 69, 0.2);
+        border-bottom-color: #28a745;
+    }
+    .modal-success .custom-modal-btn {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-cyber-glow {
+        background: linear-gradient(135deg, #2d55ff, #9333ea);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: opacity 0.3s;
+    }
+    .btn-cyber-glow:hover {
+        opacity: 0.9;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+</style>
+
+<script>
+// Modal control functions
+function showModal(type, title, message, icon) {
+    const modal = document.getElementById('customModal');
+    
+    // Remove previous type classes
+    modal.className = 'custom-modal';
+    
+    // Add type class
+    if (type === 'success') {
+        modal.classList.add('modal-success');
+    } else if (type === 'danger') {
+        modal.classList.add('modal-danger');
+    }
+    
+    // Set content
+    document.getElementById('customModalTitle').innerHTML = title;
+    document.getElementById('customModalBody').innerHTML = '<i class="' + icon + '"></i><h4>' + message + '</h4>';
+    
+    // Show modal
+    modal.style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('customModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('customModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Function to check username via AJAX
+function checkUsernameExists(username) {
+    return fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+        .then(response => response.json())
+        .then(data => {
+            return data.exists;
+        })
+        .catch(error => {
+            console.error('Error checking username:', error);
+            return false;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
+    const usernameInput = document.getElementById('username');
+    const statusDiv = document.getElementById('usernameStatus');
+    
+    // Real-time validation as user types
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            const username = this.value.trim();
+            if (username.length > 0) {
+                checkUsernameExists(username).then(exists => {
+                    if (exists) {
+                        statusDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Username exists</span>';
+                        usernameInput.style.borderColor = '#28a745';
+                    } else {
+                        statusDiv.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle-fill"></i> Username not found</span>';
+                        usernameInput.style.borderColor = '#dc3545';
+                    }
+                });
+            } else {
+                statusDiv.innerHTML = '';
+                usernameInput.style.borderColor = '';
+            }
+        });
+    }
+    
+    // Form submission
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const username = document.getElementById('username').value.trim();
+            const issueType = document.getElementById('issue_type').value;
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
+            // Validate all fields are filled
+            if (!username || !issueType || !subject || !message) {
+                showModal('danger', 'Validation Error', 'All fields are required!', 'bi bi-exclamation-triangle');
+                return;
+            }
+            
+            // Check if username exists in database
+            const usernameExists = await checkUsernameExists(username);
+            
+            if (!usernameExists) {
+                showModal('danger', 'Invalid Username', 'Username "' + username + '" not found in system', 'bi bi-person-x');
+                return;
+            }
+            
+            // Show loading state on button
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+            submitBtn.disabled = true;
+            
+            // Actually submit the form to Django
+            form.submit();
+        });
+    }
+    
+    // Check for Django messages (only show on page load if they exist)
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                setTimeout(function() {
+                    showModal('success', 'Success!', '{{ message|escapejs }}', 'bi bi-check-circle-fill');
+                }, 100);
+            {% elif message.tags == 'error' %}
+                setTimeout(function() {
+                    showModal('danger', 'Error!', '{{ message|escapejs }}', 'bi bi-exclamation-triangle');
+                }, 100);
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+</script>
+{% endblock %}

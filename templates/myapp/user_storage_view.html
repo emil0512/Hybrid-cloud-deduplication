@@ -1,0 +1,148 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Storage Analytics{% endblock %}
+
+{% block body %}
+<style>
+    .storage-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .gauge-chart {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+    }
+    
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+    }
+    
+    .stat-value {
+        color: #fff;
+        font-weight: 600;
+    }
+    
+    .stat-value-large {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #9333ea;
+    }
+</style>
+
+<div class="container">
+    <h2 class="mb-4" data-aos="fade-up">
+        <i class="bi bi-pie-chart-fill me-2 text-primary"></i>Storage Analytics
+    </h2>
+    
+    <div class="row">
+        <!-- Storage Overview -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up">
+            <div class="storage-card">
+                <h4 class="mb-4">Storage Overview</h4>
+                
+                <div class="text-center mb-4">
+                    <div class="stat-value-large">{{ usage_percent|default:"0" }}%</div>
+                    <p class="text-white-50">Storage Used</p>
+                </div>
+                
+                <div class="progress mb-4" style="height: 20px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ usage_percent|default:0 }}%;" aria-valuenow="{{ usage_percent|default:0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Total Storage</span>
+                    <span class="stat-value">{{ total_gb }} GB</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Used Storage</span>
+                    <span class="stat-value">{{ used_gb }} GB</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Free Storage</span>
+                    <span class="stat-value text-success">{{ free_gb }} GB</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Total Files</span>
+                    <span class="stat-value">{{ total }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Storage Details -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="storage-card">
+                <h4 class="mb-4">Storage Details</h4>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Used Space (Bytes)</span>
+                    <span class="stat-value">{{ sd.used }}</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Total Space (Bytes)</span>
+                    <span class="stat-value">{{ sd.total }}</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Free Space (Bytes)</span>
+                    <span class="stat-value text-success">{{ free_space }}</span>
+                </div>
+                
+                <div class="stat-row">
+                    <span class="stat-label">Storage Status</span>
+                    <span class="stat-value">
+                        {% if usage_percent > 90 %}
+                            <span class="badge bg-danger">Critical</span>
+                        {% elif usage_percent > 70 %}
+                            <span class="badge bg-warning">Warning</span>
+                        {% else %}
+                            <span class="badge bg-success">Healthy</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="storage-card mt-4">
+                <h4 class="mb-4">Quick Actions</h4>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'user_file_store_add' %}" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload me-2"></i>Upload Files
+                    </a>
+                    <a href="{% url 'user_file_store_view' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-folder me-2"></i>Manage Files
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-success { background: rgba(40, 167, 69, 0.2) !important; color: #28a745; border: 1px solid #28a745; }
+    .bg-warning { background: rgba(255, 193, 7, 0.2) !important; color: #ffc107; border: 1px solid #ffc107; }
+    .bg-danger { background: rgba(220, 53, 69, 0.2) !important; color: #dc3545; border: 1px solid #dc3545; }
+</style>
+{% endblock %}

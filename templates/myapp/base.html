@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts - Space Grotesk for modern tech look -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #030614;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Dynamic gradient mesh background */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(45, 85, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #030614 0%, #0a0f2a 100%);
+            z-index: -2;
+        }
+        
+        /* Animated grid overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(45, 85, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 85, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Floating particles */
+        .particle-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: floatParticle 15s infinite linear;
+        }
+        
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(80vh) translateX(20px) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(20vh) translateX(-20px) scale(1);
+            }
+            100% {
+                transform: translateY(0) translateX(0) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Cyber Navbar */
+        .navbar {
+            background: rgba(3, 6, 20, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(45, 85, 255, 0.2);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff 30%, #2d55ff 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+        
+        .navbar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #2d55ff, #9333ea, transparent);
+            animation: scanLine 3s linear infinite;
+        }
+        
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #fff !important;
+            text-shadow: 0 0 10px rgba(45, 85, 255, 0.5);
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #2d55ff, #9333ea);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #2d55ff;
+        }
+        
+        .nav-link:hover::before {
+            width: 80%;
+        }
+        
+        /* Cyber Button */
+        .btn-cyber {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #2d55ff;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2d55ff, #9333ea);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+        
+        .btn-cyber:hover {
+            color: #fff;
+            border-color: #9333ea;
+            box-shadow: 0 0 20px rgba(45, 85, 255, 0.5);
+        }
+        
+        .btn-cyber:hover::before {
+            width: 100%;
+        }
+        
+        .btn-cyber-glow {
+            background: linear-gradient(135deg, #2d55ff, #9333ea);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(45, 85, 255, 0.5);
+        }
+        
+        .btn-cyber-glow::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #2d55ff, #9333ea, #ec4899);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .btn-cyber-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(45, 85, 255, 0.8);
+        }
+        
+        .btn-cyber-glow:hover::before {
+            opacity: 1;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background: rgba(3, 6, 20, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(45, 85, 255, 0.3);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(45, 85, 255, 0.2), rgba(147, 51, 234, 0.2));
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        /* Main Content */
+        .content-wrapper {
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Footer */
+        .footer {
+            background: rgba(3, 6, 20, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(45, 85, 255, 0.2);
+            padding: 3rem 0;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer h6 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #fff, #2d55ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #2d55ff;
+            text-shadow: 0 0 10px #2d55ff;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #030614;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #2d55ff, #9333ea);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #9333ea, #ec4899);
+        }
+        
+        /* Data Stream Animation */
+        .data-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .data-stream span {
+            position: absolute;
+            color: #2d55ff;
+            font-family: monospace;
+            font-size: 20px;
+            animation: dataFlow 10s linear infinite;
+            white-space: nowrap;
+        }
+        
+        @keyframes dataFlow {
+            0% {
+                transform: translateY(-100%) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+    
+    <title>{% block title %}HybridCloud{% endblock %}</title>
+</head>
+<body>
+
+<!-- Dynamic Background -->
+<div class="mesh-bg"></div>
+<div class="grid-overlay"></div>
+<div class="particle-field" id="particles"></div>
+<div class="data-stream" id="dataStream"></div>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">
+            <i class="bi bi-cpu me-2"></i>HYBRID<span style="color: #2d55ff;">CLOUD</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'index' %}">
+            <i class="bi bi-house-door me-1"></i>HOME
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'contact' %}">
+            <i class="bi bi-envelope me-1"></i>SUPPORT
+        </a>
+    </li>
+</ul>
+            
+            <div class="d-flex gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-cyber dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-shield-lock me-2"></i>ACCESS
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'admin_login' %}"><i class="bi bi-key me-2"></i>Admin Portal</a></li>
+                        <li><a class="dropdown-item" href="{% url 'user_login' %}"><i class="bi bi-person-badge me-2"></i>User Portal</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="content-wrapper">
+    <div class="container pt-5 mt-5">
+        {% block hero %}{% endblock %}
+        {% block body %}{% endblock %}
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-md-start text-center mb-3 mb-md-0">
+                <h6 class="mb-2">HYBRIDCLOUD</h6>
+                <small class="text-white-50">© 2024 Next-Gen Deduplication</small>
+            </div>
+            <div class="col-md-4 text-center">
+                
+            </div>
+           
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    // Initialize AOS
+    AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100,
+        easing: 'ease-out-cubic'
+    });
+    
+    // Create particles
+    function createParticles() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = 10 + Math.random() * 10 + 's';
+            container.appendChild(particle);
+        }
+    }
+    
+    // Create data stream
+    function createDataStream() {
+        const container = document.getElementById('dataStream');
+        const chars = '01 10 101 010 110 001 100 011'.split(' ');
+        for (let i = 0; i < 20; i++) {
+            const span = document.createElement('span');
+            span.textContent = chars[Math.floor(Math.random() * chars.length)];
+            span.style.left = Math.random() * 100 + '%';
+            span.style.animationDelay = Math.random() * 10 + 's';
+            span.style.fontSize = (10 + Math.random() * 20) + 'px';
+            container.appendChild(span);
+        }
+    }
+    
+    createParticles();
+    createDataStream();
+</script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

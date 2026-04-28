@@ -1,0 +1,62 @@
+Hybrid Cloud
+-----------------
+
+1. user_login
+-------------
+id
+user_id
+uname
+passwd
+u_type
+status
+
+2. user_details
+-------------------
+id
+fname
+lname
+dob
+gender
+addr
+email
+contact
+status
+
+3. storage_details
+-------------------
+id
+user_id
+total
+used
+status
+
+4. file_index
+---------------
+id
+fname
+file_size
+dt
+tm
+signature
+url
+status
+
+5. user_file_map
+----------------
+id
+file_id
+file_name
+user_id
+dt
+tm
+status
+
+6. feedback
+------------
+id
+user_id
+msg
+dt
+tm
+status
+

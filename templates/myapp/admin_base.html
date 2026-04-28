@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Cache Control Meta Tags - IMPORTANT for logout security -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts - Space Grotesk -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #030614;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Dynamic gradient mesh background */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(45, 85, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, #030614 0%, #0a0f2a 100%);
+            z-index: -2;
+        }
+        
+        /* Animated grid overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(45, 85, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 85, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Floating particles */
+        .particle-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(45, 85, 255, 0.3);
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: floatParticle 15s infinite linear;
+        }
+        
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(80vh) translateX(20px) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(20vh) translateX(-20px) scale(1);
+            }
+            100% {
+                transform: translateY(0) translateX(0) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Premium Glass Navbar */
+        .navbar {
+            background: rgba(10, 15, 31, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(45, 85, 255, 0.2);
+            padding: 1rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1030;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff 30%, #2d55ff 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #fff !important;
+            background: rgba(45, 85, 255, 0.2);
+        }
+        
+        .nav-link.active {
+            color: #fff !important;
+            background: rgba(45, 85, 255, 0.3);
+            border-bottom: 2px solid #2d55ff;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            min-width: 18px;
+            height: 18px;
+            text-align: center;
+            line-height: 14px;
+            transform: translate(25%, -25%);
+            z-index: 10;
+        }
+        
+        /* Dropdown Menu */
+        .dropdown-menu {
+            background: rgba(10, 15, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(45, 85, 255, 0.3);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+        
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(45, 85, 255, 0.2);
+            color: white;
+        }
+        
+        .dropdown-item:focus {
+            outline: none;
+        }
+        
+        /* Navbar dropdown toggle */
+        .navbar-nav .dropdown-toggle {
+            cursor: pointer;
+        }
+        
+        .navbar-nav .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        
+        /* Content Wrapper */
+        .content-wrapper {
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            background: rgba(10, 15, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2d55ff;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(45, 85, 255, 0.3);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(45, 85, 255, 0.3);
+        }
+        
+        .modal-title {
+            color: white;
+        }
+        
+        .close {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .close:hover {
+            color: white;
+            opacity: 1;
+        }
+        
+        /* Table Styles */
+        .table {
+            color: white !important;
+            background: rgba(45, 85, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: rgba(45, 85, 255, 0.2);
+            color: #2d55ff;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(45, 85, 255, 0.3);
+        }
+        
+        .table tbody tr {
+            border-bottom: 1px solid rgba(45, 85, 255, 0.1);
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(45, 85, 255, 0.1);
+        }
+        
+        .table td, .table th {
+            color: white !important;
+            vertical-align: middle;
+        }
+        
+        /* Card Styles */
+        .card {
+            background: rgba(45, 85, 255, 0.05);
+            border: 1px solid rgba(45, 85, 255, 0.2);
+            border-radius: 16px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-header {
+            background: rgba(45, 85, 255, 0.1);
+            border-bottom: 1px solid rgba(45, 85, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #2d55ff, #9333ea);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(45, 85, 255, 0.3);
+        }
+        
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 8px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            border: 1px solid #2d55ff;
+            color: #2d55ff;
+            background: transparent;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #2d55ff;
+            color: white;
+        }
+        
+        /* Footer */
+        .footer {
+            background: rgba(5, 8, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(45, 85, 255, 0.2);
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #030614;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #2d55ff, #9333ea);
+            border-radius: 5px;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast {
+            background: rgba(10, 15, 31, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2d55ff;
+            color: white;
+            border-radius: 12px;
+        }
+        
+        .toast-header {
+            background: rgba(45, 85, 255, 0.2);
+            color: white;
+            border-bottom: 1px solid rgba(45, 85, 255, 0.3);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* Password Strength Meter */
+        .password-strength {
+            height: 5px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .strength-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-weak { width: 25%; background: #dc3545; }
+        .strength-medium { width: 50%; background: #ffc107; }
+        .strength-strong { width: 75%; background: #28a745; }
+        .strength-very-strong { width: 100%; background: #2d55ff; }
+    </style>
+    
+    <title>{% block title %}Admin Panel - HybridCloud{% endblock %}</title>
+</head>
+<body>
+    <!-- Dynamic Background -->
+    <div class="mesh-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particle-field" id="particles"></div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="logoutModalLabel">
+                        <i class="bi bi-box-arrow-right text-danger me-2"></i>Confirm Logout
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-white-50">
+                    Are you sure you want to logout from the admin panel?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmLogoutBtn">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="changePasswordModalLabel">
+                        <i class="bi bi-key text-primary me-2"></i>Change Password
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="changePasswordForm" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="text-white-50 mb-2">Current Password</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" style="background: rgba(45, 85, 255, 0.2); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                </div>
+                                <input type="password" name="current_password" id="current_password" class="form-control" required
+                                       style="background: rgba(45, 85, 255, 0.1); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-white-50 mb-2">New Password</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" style="background: rgba(45, 85, 255, 0.2); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                                        <i class="bi bi-key"></i>
+                                    </span>
+                                </div>
+                                <input type="password" name="new_password" id="newPassword" class="form-control" required
+                                       style="background: rgba(45, 85, 255, 0.1); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="strength-bar" id="passwordStrength"></div>
+                            </div>
+                            <small class="text-white-50" id="passwordStrengthText">Enter a strong password</small>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="text-white-50 mb-2">Confirm New Password</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" style="background: rgba(45, 85, 255, 0.2); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                                        <i class="bi bi-check-circle"></i>
+                                    </span>
+                                </div>
+                                <input type="password" name="confirm_password" id="confirmPassword" class="form-control" required
+                                       style="background: rgba(45, 85, 255, 0.1); border: 1px solid rgba(45, 85, 255, 0.3); color: white;">
+                            </div>
+                            <small class="text-danger d-none" id="passwordMismatch">Passwords do not match</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                            <i class="bi bi-check-circle me-2"></i>Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'admin_home' %}">
+                <i class="bi bi-shield-lock me-2"></i>HYBRID<span style="color: #2d55ff;">CLOUD</span> ADMIN
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/admin_home' %}active{% endif %}" href="{% url 'admin_home' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/admin_user_view' in request.path %}active{% endif %}" href="{% url 'admin_user_view' %}">
+                            <i class="bi bi-people me-1"></i>Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/admin_user_feedback_view' in request.path %}active{% endif %}" href="{% url 'admin_user_feedback_view' %}">
+                            <i class="bi bi-chat-dots me-1"></i>Feedback
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/admin_support_tickets' in request.path %}active{% endif %}" href="{% url 'admin_support_tickets' %}" style="position: relative;">
+                            <i class="bi bi-ticket me-1"></i>Tickets
+                            <span class="notification-badge" id="ticket-count">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://192.168.56.101/" target="_blank">
+                            <i class="bi bi-cloud me-1"></i>Cloud Storage
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {% if request.session.user_name %}
+                                {{ request.session.user_name }}
+                            {% else %}
+                                Admin
+                            {% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                            <button class="dropdown-item" type="button" onclick="openChangePasswordModal()">
+                                <i class="bi bi-key me-2"></i>Change Password
+                            </button>
+                            <div class="dropdown-divider" style="border-color: rgba(45, 85, 255, 0.3);"></div>
+                            <button class="dropdown-item" type="button" onclick="openLogoutModal()">
+                                <i class="bi bi-box-arrow-right me-2 text-danger"></i>Logout
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content-wrapper">
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="background: rgba(45, 85, 255, 0.1); border: 1px solid #2d55ff; color: white;">
+                        {{ message }}
+                        <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block body %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-start text-center mb-2 mb-md-0">
+                    <small class="text-white-50">
+                        <i class="bi bi-shield-check text-primary me-1"></i>
+                        HybridCloud Admin Panel • Secure Session
+                    </small>
+                </div>
+                <div class="col-md-6 text-md-end text-center">
+                    <small class="text-white-50">
+                        <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i>
+                        System Online • Last Updated: <span id="lastUpdateTime"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+        
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = 10 + Math.random() * 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Function to open change password modal
+        function openChangePasswordModal() {
+            $('#changePasswordModal').modal('show');
+        }
+        
+        // Function to open logout modal
+        function openLogoutModal() {
+            $('#logoutModal').modal('show');
+        }
+        
+        // Update ticket count via AJAX
+        function updateTicketCount() {
+            $.ajax({
+                url: '{% url "get_ticket_count" %}',
+                method: 'GET',
+                timeout: 5000,
+                success: function(data) {
+                    $('#ticket-count').text(data.count);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error fetching ticket count:', error);
+                }
+            });
+        }
+        
+        // Password strength checker
+        $('#newPassword').on('input', function() {
+            const password = $(this).val();
+            const strengthBar = $('#passwordStrength');
+            const strengthText = $('#passwordStrengthText');
+            
+            strengthBar.removeClass('strength-weak strength-medium strength-strong strength-very-strong');
+            
+            if (password.length === 0) {
+                strengthBar.css('width', '0');
+                strengthText.text('Enter a strong password');
+            } else if (password.length < 6) {
+                strengthBar.addClass('strength-weak');
+                strengthText.text('Weak - Too short');
+            } else if (password.length < 8) {
+                strengthBar.addClass('strength-medium');
+                strengthText.text('Medium - Could be stronger');
+            } else if (password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)) {
+                strengthBar.addClass('strength-very-strong');
+                strengthText.text('Very Strong - Excellent');
+            } else if (password.match(/^(?=.*[a-z])(?=.*[A-Z])|(?=.*\d)/)) {
+                strengthBar.addClass('strength-strong');
+                strengthText.text('Strong - Good');
+            }
+        });
+        
+        // Password confirmation checker
+        $('#confirmPassword, #newPassword').on('input', function() {
+            const newPass = $('#newPassword').val();
+            const confirmPass = $('#confirmPassword').val();
+            const mismatchMsg = $('#passwordMismatch');
+            const submitBtn = $('#changePasswordBtn');
+            
+            if (confirmPass.length > 0) {
+                if (newPass !== confirmPass) {
+                    mismatchMsg.removeClass('d-none');
+                    submitBtn.prop('disabled', true);
+                } else {
+                    mismatchMsg.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+                }
+            }
+        });
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const icon = type === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger';
+            const toast = `
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="3000">
+                    <div class="toast-header">
+                        <i class="bi ${icon} me-2"></i>
+                        <strong class="mr-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+                        <small>just now</small>
+                        <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            $('#toastContainer').append(toast);
+            
+            setTimeout(() => {
+                $('.toast').first().fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+        
+        // Update last update time
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            $('#lastUpdateTime').text(timeString);
+        }
+        
+        // Auto-refresh data every 30 seconds
+        function startAutoRefresh() {
+            setInterval(function() {
+                updateTicketCount();
+                updateLastUpdateTime();
+                $(document).trigger('refreshData');
+            }, 30000);
+        }
+        
+        // Logout function with loading state
+        $('#confirmLogoutBtn').on('click', function() {
+            const btn = $(this);
+            const originalText = btn.html();
+            
+            btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging out...');
+            btn.prop('disabled', true);
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "admin_logout" %}';
+            
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = 'csrfmiddlewaretoken';
+            csrf.value = '{{ csrf_token }}';
+            form.appendChild(csrf);
+            
+            document.body.appendChild(form);
+            form.submit();
+        });
+        
+        // Handle change password form submission
+        $('#changePasswordForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = $('#current_password').val();
+            const newPassword = $('#newPassword').val();
+            const confirmPassword = $('#confirmPassword').val();
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            const formData = {
+                current_password: currentPassword,
+                new_password: newPassword,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            };
+            
+            const submitBtn = $('#changePasswordBtn');
+            const originalText = submitBtn.html();
+            submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+            submitBtn.prop('disabled', true);
+            
+            $.ajax({
+                url: '{% url "admin_changepassword" %}',
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    $('#changePasswordModal').modal('hide');
+                    showToast(response.message || 'Password changed successfully!', 'success');
+                    $('#changePasswordForm')[0].reset();
+                    $('#passwordStrength').css('width', '0');
+                    $('#passwordStrengthText').text('Enter a strong password');
+                },
+                error: function(xhr) {
+                    let errorMsg = 'Error changing password';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    showToast(errorMsg, 'error');
+                },
+                complete: function() {
+                    submitBtn.html(originalText);
+                    submitBtn.prop('disabled', false);
+                }
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            updateTicketCount();
+            updateLastUpdateTime();
+            startAutoRefresh();
+            
+            // Trigger initial data load for dashboard
+            if (window.location.pathname.includes('admin_home')) {
+                setTimeout(function() {
+                    $(document).trigger('refreshData');
+                }, 500);
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

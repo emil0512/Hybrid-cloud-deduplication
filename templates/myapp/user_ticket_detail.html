@@ -1,0 +1,272 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.id }} Details{% endblock %}
+
+{% block body %}
+<style>
+    .ticket-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .ticket-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+    }
+    
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+    }
+    
+    .ticket-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .status-open {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .status-progress {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+    
+    .status-resolved {
+        background: rgba(147, 51, 234, 0.2);
+        color: #9333ea;
+        border: 1px solid #9333ea;
+    }
+    
+    .status-closed {
+        background: rgba(108, 117, 125, 0.2);
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
+    
+    .priority-high {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+    
+    .priority-medium {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+    
+    .priority-low {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .ticket-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        background: rgba(147, 51, 234, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .meta-label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 0.25rem;
+    }
+    
+    .meta-value {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .message-box {
+        background: rgba(147, 51, 234, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+    }
+    
+    .message-content {
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .notification-item {
+        background: rgba(147, 51, 234, 0.05);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #9333ea;
+    }
+    
+    .notification-time {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 0.5rem;
+    }
+    
+    .back-button {
+        margin-top: 2rem;
+        text-align: center;
+    }
+</style>
+
+<div class="container">
+    <div class="ticket-container">
+        <!-- Ticket Header -->
+        <div class="ticket-card" data-aos="fade-up">
+            <div class="ticket-header">
+                <h2 class="ticket-title">
+                    <i class="bi bi-ticket-fill me-2 text-primary"></i>
+                    Ticket #{{ ticket.id }}
+                </h2>
+                <div>
+                    <span class="status-badge 
+                        {% if ticket.status == 'open' %}status-open
+                        {% elif ticket.status == 'in_progress' %}status-progress
+                        {% elif ticket.status == 'resolved' %}status-resolved
+                        {% else %}status-closed{% endif %}">
+                        {{ ticket.status|title }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Ticket Meta Information -->
+            <div class="ticket-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Subject</span>
+                    <span class="meta-value">{{ ticket.subject }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Issue Type</span>
+                    <span class="meta-value">{{ ticket.issue_type|title }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Priority</span>
+                    <span class="meta-value">
+                        <span class="priority-badge 
+                            {% if ticket.priority == 'high' %}priority-high
+                            {% elif ticket.priority == 'medium' %}priority-medium
+                            {% else %}priority-low{% endif %}">
+                            {{ ticket.priority|title }}
+                        </span>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Created On</span>
+                    <span class="meta-value">{{ ticket.created_at|date:"Y-m-d H:i" }}</span>
+                </div>
+            </div>
+            
+            <!-- Original Message -->
+            <div class="message-box">
+                <div class="message-header">
+                    <span>
+                        <i class="bi bi-person-circle me-1"></i>
+                        {{ ticket.user_name }}
+                    </span>
+                    <span>
+                        <i class="bi bi-clock me-1"></i>
+                        {{ ticket.created_at|date:"Y-m-d H:i" }}
+                    </span>
+                </div>
+                <div class="message-content">
+                    {{ ticket.message }}
+                </div>
+            </div>
+            
+            <!-- Admin Response (if any) -->
+            {% if ticket.admin_response %}
+                <div class="message-box" style="border-left: 3px solid #28a745;">
+                    <div class="message-header">
+                        <span>
+                            <i class="bi bi-shield-check me-1 text-success"></i>
+                            Admin Response
+                        </span>
+                        {% if ticket.responded_at %}
+                            <span>
+                                <i class="bi bi-clock me-1"></i>
+                                {{ ticket.responded_at|date:"Y-m-d H:i" }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="message-content">
+                        {{ ticket.admin_response }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Notifications Section -->
+        {% if notifications %}
+            <div class="ticket-card" data-aos="fade-up">
+                <h4 class="mb-4">
+                    <i class="bi bi-bell-fill me-2 text-primary"></i>
+                    Ticket Updates
+                </h4>
+                
+                {% for notif in notifications %}
+                    <div class="notification-item">
+                        <div class="notification-time">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ notif.created_at|date:"Y-m-d H:i" }}
+                        </div>
+                        <div class="notification-message">
+                            {{ notif.message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Back Button -->
+        <div class="back-button">
+            <a href="{% url 'user_tickets' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Tickets
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

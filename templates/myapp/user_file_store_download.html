@@ -1,0 +1,108 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Download File{% endblock %}
+
+{% block body %}
+<style>
+    .download-container {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    
+    .download-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: rgba(40, 167, 69, 0.2);
+        border: 2px solid #28a745;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+    }
+    
+    .success-icon i {
+        font-size: 3rem;
+        color: #28a745;
+    }
+    
+    .file-info {
+        background: rgba(147, 51, 234, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .file-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        word-break: break-word;
+    }
+    
+    .btn-download {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <div class="download-container" data-aos="fade-up">
+        <div class="download-card">
+            <div class="success-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            
+            <h2 class="mb-3">Ready to Download!</h2>
+            <p class="text-white-50 mb-4">Your file has been prepared for download</p>
+            
+            <div class="file-info">
+                <i class="bi bi-file-earmark text-primary mb-2" style="font-size: 2rem;"></i>
+                <div class="file-name">{{ fileurl }}</div>
+                <p class="text-white-50 mt-2">Click the button below to start downloading</p>
+            </div>
+            
+            <a href="{% static 'myapp/media/' %}{{ fileurl }}" 
+               class="btn-download" 
+               download>
+                <i class="bi bi-download me-2"></i>Download File
+            </a>
+            
+            <div class="mt-4">
+                <a href="{% url 'user_file_store_view' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Files
+                </a>
+            </div>
+        </div>
+        
+        {% if msg %}
+            <div class="alert alert-info mt-4">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ msg }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

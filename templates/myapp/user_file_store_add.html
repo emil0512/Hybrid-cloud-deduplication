@@ -1,0 +1,872 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Upload File{% endblock %}
+
+{% block body %}
+<style>
+    .upload-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .upload-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .upload-area {
+        border: 2px dashed rgba(147, 51, 234, 0.5);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upload-area:hover,
+    .upload-area.dragover {
+        border-color: #9333ea;
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .upload-area i {
+        font-size: 4rem;
+        color: #9333ea;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-area h4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-area p {
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 0;
+    }
+    
+    .progress {
+        height: 10px;
+        margin-top: 1rem;
+        display: none;
+    }
+    
+    .selected-file {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background: rgba(147, 51, 234, 0.1);
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .selected-file i {
+        color: #9333ea;
+        margin-right: 0.5rem;
+    }
+    
+    .selected-file .file-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .selected-file .remove-file {
+        color: #dc3545;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .selected-file .remove-file:hover {
+        background: rgba(220, 53, 69, 0.2);
+        border-radius: 4px;
+    }
+    
+    /* Message Styling */
+    .message-container {
+        margin-bottom: 2rem;
+    }
+    
+    .success-message {
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(147, 51, 234, 0.05));
+        border-left: 4px solid #198754;
+        border-radius: 12px;
+        padding: 1.5rem;
+        animation: slideIn 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-message {
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(25, 135, 84, 0.05));
+        border-left: 4px solid #9333ea;
+        border-radius: 12px;
+        padding: 1.5rem;
+        animation: slideIn 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .warning-message {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(147, 51, 234, 0.05));
+        border-left: 4px solid #ffc107;
+        border-radius: 12px;
+        padding: 1.5rem;
+        animation: slideIn 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .message-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .message-icon.success {
+        background: rgba(25, 135, 84, 0.2);
+        color: #198754;
+    }
+    
+    .message-icon.info {
+        background: rgba(147, 51, 234, 0.2);
+        color: #9333ea;
+    }
+    
+    .message-icon.warning {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .file-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-left: 1rem;
+    }
+    
+    .file-badge.new {
+        background: rgba(25, 135, 84, 0.2);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    
+    .file-badge.duplicate {
+        background: rgba(147, 51, 234, 0.2);
+        color: #9333ea;
+        border: 1px solid rgba(147, 51, 234, 0.3);
+    }
+    
+    .terminal-status {
+        font-family: 'Courier New', monospace;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #00ff00;
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .terminal-status i {
+        color: #9333ea;
+    }
+    
+    .upload-again-btn {
+        background: transparent;
+        border: 2px solid #9333ea;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .upload-again-btn:hover {
+        background: #9333ea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(147, 51, 234, 0.3);
+    }
+    
+    .file-details {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+        border: 1px solid rgba(147, 51, 234, 0.2);
+    }
+    
+    .file-detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .file-detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 400;
+    }
+    
+    .detail-value {
+        color: white;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container">
+    <div class="upload-container">
+        <h2 class="mb-4 text-center" data-aos="fade-up">
+            <i class="bi bi-cloud-upload-fill me-2 text-primary"></i>Upload File
+        </h2>
+        
+        <!-- Message Area for AJAX responses -->
+        <div id="ajaxMessageArea" style="display: none;"></div>
+        
+        <!-- Display any existing messages from Django -->
+        {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}success-message{% elif message.tags == 'warning' %}warning-message{% else %}info-message{% endif %} d-flex align-items-start gap-3">
+                        <div class="message-icon {% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-lg{% elif message.tags == 'warning' %}bi-exclamation-triangle{% else %}bi-info-lg{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-2 {% if message.tags == 'success' %}text-success{% elif message.tags == 'warning' %}text-warning{% else %}text-primary{% endif %}">
+                                {% if message.tags == 'success' %}
+                                    <i class="bi bi-check-circle-fill me-2"></i>Upload Successful
+                                {% elif message.tags == 'warning' %}
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Warning
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill me-2"></i>Information
+                                {% endif %}
+                            </h5>
+                            <p class="mb-0">{{ message }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Display msg from context (traditional Django response) -->
+        {% if msg %}
+            <div class="message-container">
+                <div class="
+                    {% if 'Uploaded Successfully' in msg %}success-message
+                    {% elif 'already exists' in msg|lower or 'Same' in msg %}info-message
+                    {% elif 'limit' in msg|lower %}warning-message
+                    {% else %}info-message{% endif %} 
+                    d-flex align-items-start gap-3">
+                    <div class="message-icon 
+                        {% if 'Uploaded Successfully' in msg %}success
+                        {% elif 'already exists' in msg|lower or 'Same' in msg %}info
+                        {% elif 'limit' in msg|lower %}warning
+                        {% else %}info{% endif %}">
+                        <i class="bi 
+                            {% if 'Uploaded Successfully' in msg %}bi-check-lg
+                            {% elif 'already exists' in msg|lower or 'Same' in msg %}bi-files
+                            {% elif 'limit' in msg|lower %}bi-exclamation-triangle
+                            {% else %}bi-info-lg{% endif %}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-2 
+                            {% if 'Uploaded Successfully' in msg %}text-success
+                            {% elif 'already exists' in msg|lower or 'Same' in msg %}text-primary
+                            {% elif 'limit' in msg|lower %}text-warning
+                            {% else %}text-primary{% endif %}">
+                            {% if 'Uploaded Successfully' in msg %}
+                                <i class="bi bi-check-circle-fill me-2"></i>Upload Successful
+                            {% elif 'already exists' in msg|lower or 'Same' in msg %}
+                                <i class="bi bi-files me-2"></i>File Already in System
+                            {% elif 'limit' in msg|lower %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Storage Notice
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2"></i>Information
+                            {% endif %}
+                            
+                            {% if 'already exists' in msg|lower or 'Same' in msg %}
+                                <span class="file-badge duplicate">
+                                    <i class="bi bi-files me-1"></i>Duplicate File
+                                </span>
+                                <span class="terminal-status ms-2">
+                                    <i class="bi bi-terminal-fill me-1"></i>
+                                    Terminal: SAME
+                                </span>
+                            {% elif 'Uploaded Successfully' in msg %}
+                                <span class="file-badge new">
+                                    <i class="bi bi-file-earmark-plus me-1"></i>New File
+                                </span>
+                                <span class="terminal-status ms-2">
+                                    <i class="bi bi-terminal-fill me-1"></i>
+                                    Terminal: NEW
+                                </span>
+                            {% endif %}
+                        </h5>
+                        
+                        <div class="mb-3">
+                            {% if 'already exists' in msg|lower or 'Same' in msg %}
+                                <p class="mb-2">This file already exists in our cloud storage system.</p>
+                                <div class="file-details">
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">System Status:</span>
+                                        <span class="detail-value">
+                                            <span class="text-primary">
+                                                <i class="bi bi-files me-1"></i>Duplicate (Same)
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">Action Taken:</span>
+                                        <span class="detail-value">Reference added to your account</span>
+                                    </div>
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">Storage Impact:</span>
+                                        <span class="detail-value text-success">
+                                            <i class="bi bi-arrow-down me-1"></i>No additional storage used
+                                        </span>
+                                    </div>
+                                </div>
+                            {% elif 'Uploaded Successfully' in msg %}
+                                <p class="mb-2">Your file has been uploaded successfully!</p>
+                                <div class="file-details">
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">System Status:</span>
+                                        <span class="detail-value">
+                                            <span class="text-success">
+                                                <i class="bi bi-file-earmark-plus me-1"></i>New File
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">Action Taken:</span>
+                                        <span class="detail-value">File added to your storage</span>
+                                    </div>
+                                    <div class="file-detail-item">
+                                        <span class="detail-label">Storage Impact:</span>
+                                        <span class="detail-value text-warning">
+                                            <i class="bi bi-arrow-up me-1"></i>Storage space used
+                                        </span>
+                                    </div>
+                                </div>
+                            {% elif 'limit' in msg|lower %}
+                                <p class="mb-0">{{ msg }}</p>
+                            {% else %}
+                                <p class="mb-0">{{ msg }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <a href="{% url 'user_file_store_add' %}" class="upload-again-btn">
+                                <i class="bi bi-cloud-upload"></i>
+                                Upload Another File
+                            </a>
+                            <a href="{% url 'user_file_store_view' %}" class="btn btn-outline-primary ms-2">
+                                <i class="bi bi-folder"></i>
+                                View My Files
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Upload Form (shown only when no message exists) -->
+        {% if not msg and not messages %}
+        <div class="upload-card" data-aos="fade-up" id="uploadCard">
+            <form id="uploadForm" method="post" enctype="multipart/form-data" action="{% url 'user_file_store_add' %}">
+                {% csrf_token %}
+                
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <h4>Drag & Drop your file here</h4>
+                    <p>or click to browse</p>
+                    <input type="file" name="document" id="fileInput" style="display: none;" required>
+                </div>
+                
+                <!-- Selected File Info -->
+                <div class="selected-file" id="selectedFile" style="display: none;">
+                    <div>
+                        <i class="bi bi-file-earmark"></i>
+                        <span class="file-name" id="fileName"></span>
+                    </div>
+                    <span class="remove-file" onclick="removeFile()">
+                        <i class="bi bi-x-lg"></i>
+                    </span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress" id="uploadProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: 0%;" 
+                         aria-valuenow="0" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">0%</div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        <i class="bi bi-cloud-upload me-2"></i>Upload File
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="resetForm()">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        
+        <!-- Storage Info (always shown) -->
+        <div class="upload-card mt-4" data-aos="fade-up">
+            <h5 class="mb-3">Storage Information</h5>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-white-50">Available Space:</span>
+                <span class="text-success" id="freeSpace">Loading...</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="storageProgress" role="progressbar" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const selectedFile = document.getElementById('selectedFile');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = uploadProgress.querySelector('.progress-bar');
+    const ajaxMessageArea = document.getElementById('ajaxMessageArea');
+    const uploadCard = document.getElementById('uploadCard');
+    
+    // Function to show AJAX response message from JSON
+    function showAjaxMessage(response) {
+        console.log('Server response:', response); // Debug log
+        
+        let messageType = 'info';
+        let title = 'Information';
+        let status = 'unknown';
+        let message = 'File processed';
+        
+        // Handle JSON response
+        if (response.success) {
+            status = response.status || 'new';
+            message = response.message || 'File uploaded successfully';
+            
+            if (status === 'new') {
+                messageType = 'success';
+                title = 'Upload Successful';
+            } else if (status === 'same') {
+                messageType = 'info';
+                title = 'File Already in System';
+            }
+        } else {
+            messageType = 'warning';
+            title = 'Upload Failed';
+            message = response.message || 'An error occurred';
+            status = 'error';
+        }
+        
+        // Create badge and terminal status
+        const badgeHtml = status === 'new' 
+            ? '<span class="file-badge new"><i class="bi bi-file-earmark-plus me-1"></i>New File</span>'
+            : (status === 'same' ? '<span class="file-badge duplicate"><i class="bi bi-files me-1"></i>Duplicate File</span>' : '');
+        
+        const terminalHtml = status === 'new' || status === 'same'
+            ? `<span class="terminal-status ms-2"><i class="bi bi-terminal-fill me-1"></i>Terminal: ${status.toUpperCase()}</span>`
+            : '';
+        
+        // Create details HTML
+        let detailsHtml = '';
+        if (status === 'new') {
+            detailsHtml = `
+                <div class="file-details mt-3">
+                    <div class="file-detail-item">
+                        <span class="detail-label">System Status:</span>
+                        <span class="detail-value">
+                            <span class="text-success">
+                                <i class="bi bi-file-earmark-plus me-1"></i>New File
+                            </span>
+                        </span>
+                    </div>
+                    <div class="file-detail-item">
+                        <span class="detail-label">Action Taken:</span>
+                        <span class="detail-value">File added to your storage</span>
+                    </div>
+                    <div class="file-detail-item">
+                        <span class="detail-label">Storage Impact:</span>
+                        <span class="detail-value text-warning">
+                            <i class="bi bi-arrow-up me-1"></i>Storage space used
+                        </span>
+                    </div>
+                </div>
+            `;
+        } else if (status === 'same') {
+            detailsHtml = `
+                <div class="file-details mt-3">
+                    <div class="file-detail-item">
+                        <span class="detail-label">System Status:</span>
+                        <span class="detail-value">
+                            <span class="text-primary">
+                                <i class="bi bi-files me-1"></i>Duplicate (Same)
+                            </span>
+                        </span>
+                    </div>
+                    <div class="file-detail-item">
+                        <span class="detail-label">Action Taken:</span>
+                        <span class="detail-value">Reference added to your account</span>
+                    </div>
+                    <div class="file-detail-item">
+                        <span class="detail-label">Storage Impact:</span>
+                        <span class="detail-value text-success">
+                            <i class="bi bi-arrow-down me-1"></i>No additional storage used
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const messageHtml = `
+            <div class="message-container">
+                <div class="${messageType === 'success' ? 'success-message' : (messageType === 'warning' ? 'warning-message' : 'info-message')} d-flex align-items-start gap-3">
+                    <div class="message-icon ${messageType}">
+                        <i class="bi ${messageType === 'success' ? 'bi-check-lg' : (messageType === 'warning' ? 'bi-exclamation-triangle' : 'bi-info-lg')}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-2 ${messageType === 'success' ? 'text-success' : (messageType === 'warning' ? 'text-warning' : 'text-primary')}">
+                            <i class="bi ${messageType === 'success' ? 'bi-check-circle-fill' : (messageType === 'warning' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill')} me-2"></i>
+                            ${title}
+                            ${badgeHtml}
+                            ${terminalHtml}
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <p class="mb-0">${message}</p>
+                            ${detailsHtml}
+                        </div>
+                        
+                        <div>
+                            <a href="{% url 'user_file_store_add' %}" class="upload-again-btn">
+                                <i class="bi bi-cloud-upload"></i>
+                                Upload Another File
+                            </a>
+                            <a href="{% url 'user_file_store_view' %}" class="btn btn-outline-primary ms-2">
+                                <i class="bi bi-folder"></i>
+                                View My Files
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        ajaxMessageArea.innerHTML = messageHtml;
+        ajaxMessageArea.style.display = 'block';
+        if (uploadCard) {
+            uploadCard.style.display = 'none';
+        }
+    }
+    
+    // Drag & Drop handlers
+    if (uploadArea) {
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+    }
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+    
+    function handleFileSelect() {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            
+            // Check file size (max 100MB)
+            const maxSize = 100 * 1024 * 1024; // 100MB in bytes
+            if (file.size > maxSize) {
+                alert('File size exceeds 100MB limit. Please choose a smaller file.');
+                fileInput.value = '';
+                return;
+            }
+            
+            fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+            selectedFile.style.display = 'flex';
+            uploadArea.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function removeFile() {
+        fileInput.value = '';
+        selectedFile.style.display = 'none';
+        uploadArea.style.display = 'block';
+        submitBtn.disabled = true;
+        uploadProgress.style.display = 'none';
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+    }
+    
+    function resetForm() {
+        removeFile();
+    }
+    
+    // Form submission with progress
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = Math.round(percentComplete) + '%';
+                    uploadProgress.style.display = 'block';
+                }
+            });
+            
+            xhr.addEventListener('load', function() {
+                if (xhr.status === 200) {
+                    try {
+                        // Parse JSON response
+                        const response = JSON.parse(xhr.responseText);
+                        showAjaxMessage(response);
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        alert('Unexpected server response');
+                    }
+                    
+                    // Refresh storage info
+                    fetchStorageInfo();
+                } else {
+                    alert('Upload failed. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Upload File';
+                    uploadProgress.style.display = 'none';
+                }
+            });
+            
+            xhr.addEventListener('error', function() {
+                alert('Network error. Please check your connection.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Upload File';
+                uploadProgress.style.display = 'none';
+            });
+            
+            xhr.open('POST', this.action);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+            xhr.send(formData);
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+        });
+    }
+    
+    // Fetch storage info
+    function fetchStorageInfo() {
+        fetch('/user_storage_stats/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('freeSpace').textContent = data.free_gb + ' GB';
+                document.getElementById('storageProgress').style.width = data.usage_percent + '%';
+            })
+            .catch(error => {
+                console.error('Error fetching storage info:', error);
+                document.getElementById('freeSpace').textContent = 'Unknown';
+            });
+    }
+    
+    // Initialize
+    fetchStorageInfo();
+    // Add this inside your existing <script> tag in user_file_store_add.html
+
+// Enhanced form submission with scanning progress
+const originalSubmitHandler = uploadForm.onsubmit;
+uploadForm.onsubmit = function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const xhr = new XMLHttpRequest();
+    
+    // Show scanning message
+    const scanMsg = document.createElement('div');
+    scanMsg.id = 'scanProgress';
+    scanMsg.className = 'text-info mb-3';
+    scanMsg.innerHTML = '<i class="bi bi-shield-check me-2"></i>🔍 Scanning file for security threats...';
+    
+    // Insert before progress bar
+    uploadProgress.parentNode.insertBefore(scanMsg, uploadProgress);
+    
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressBar.style.width = percentComplete + '%';
+            progressBar.textContent = Math.round(percentComplete) + '%';
+            uploadProgress.style.display = 'block';
+            
+            // Update scanning message
+            if (percentComplete === 100) {
+                scanMsg.innerHTML = '<i class="bi bi-shield-lock me-2"></i>🔬 Analyzing file content...';
+            }
+        }
+    });
+    
+    xhr.addEventListener('load', function() {
+        const scanProgress = document.getElementById('scanProgress');
+        if (scanProgress) scanProgress.remove();
+        
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                
+                // Check if file was rejected due to security
+                if (response.status === 'security_rejected') {
+                    // Show detailed security alert
+                    let alertHtml = `
+                        <div class="message-container">
+                            <div class="warning-message d-flex align-items-start gap-3">
+                                <div class="message-icon warning">
+                                    <i class="bi bi-shield-x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-2 text-warning">
+                                        <i class="bi bi-shield-x-fill me-2"></i>
+                                        ⚠️ SECURITY THREAT DETECTED
+                                    </h5>
+                                    <div class="mb-3">
+                                        <p class="text-danger fw-bold">File rejected: ${response.message}</p>
+                    `;
+                    
+                    if (response.threats && response.threats.length > 0) {
+                        alertHtml += '<div class="mt-2"><strong>Threats detected:</strong><ul class="text-danger mt-1">';
+                        response.threats.forEach(threat => {
+                            alertHtml += `<li><i class="bi bi-exclamation-triangle me-2"></i>${threat}</li>`;
+                        });
+                        alertHtml += '</ul></div>';
+                    }
+                    
+                    if (response.warnings && response.warnings.length > 0) {
+                        alertHtml += '<div class="mt-2"><strong>Warnings:</strong><ul class="text-warning mt-1">';
+                        response.warnings.forEach(warning => {
+                            alertHtml += `<li><i class="bi bi-exclamation-diamond me-2"></i>${warning}</li>`;
+                        });
+                        alertHtml += '</ul></div>';
+                    }
+                    
+                    alertHtml += `
+                                    </div>
+                                    <a href="{% url 'user_file_store_add' %}" class="btn btn-warning">
+                                        <i class="bi bi-arrow-repeat me-2"></i>Try Different File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    ajaxMessageArea.innerHTML = alertHtml;
+                    ajaxMessageArea.style.display = 'block';
+                    if (uploadCard) uploadCard.style.display = 'none';
+                    
+                } else {
+                    showAjaxMessage(response);
+                }
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                alert('Unexpected server response');
+            }
+            
+            fetchStorageInfo();
+        } else {
+            alert('Upload failed. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Upload File';
+            uploadProgress.style.display = 'none';
+            const scanProgress = document.getElementById('scanProgress');
+            if (scanProgress) scanProgress.remove();
+        }
+    });
+    
+    xhr.addEventListener('error', function() {
+        const scanProgress = document.getElementById('scanProgress');
+        if (scanProgress) scanProgress.remove();
+        alert('Network error. Please check your connection.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Upload File';
+        uploadProgress.style.display = 'none';
+    });
+    
+    xhr.open('POST', this.action);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+    xhr.send(formData);
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+};
+</script>
+{% endblock %}

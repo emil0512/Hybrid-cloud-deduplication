@@ -1,0 +1,167 @@
+{% extends 'myapp/admin_base.html' %}
+{% load static %}
+
+{% block title %}User Feedback{% endblock %}
+
+{% block body %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #fff, #2d55ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .message-count {
+        background: rgba(45, 85, 255, 0.2);
+        color: #2d55ff;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        border: 1px solid rgba(45, 85, 255, 0.3);
+    }
+    
+    .feedback-card {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 16px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .feedback-card:hover {
+        transform: translateY(-5px);
+        border-color: #2d55ff;
+        box-shadow: 0 10px 30px rgba(45, 85, 255, 0.2);
+    }
+    
+    .feedback-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(45, 85, 255, 0.2);
+    }
+    
+    .user-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(45, 85, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .user-icon i {
+        color: #2d55ff;
+        font-size: 1.2rem;
+    }
+    
+    .user-info h6 {
+        margin: 0;
+        color: #fff;
+    }
+    
+    .user-info small {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .feedback-message {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .feedback-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .status-badge {
+        background: rgba(45, 85, 255, 0.2);
+        color: #2d55ff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="bi bi-chat-dots me-2"></i>User Feedback
+    </h1>
+    <span class="message-count">{{ message_list|length }} Messages</span>
+</div>
+
+<!-- Feedback Grid -->
+<div class="row">
+    {% for feedback in message_list %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="feedback-card" data-aos="fade-up">
+            <div class="feedback-header">
+                <div class="user-icon">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div class="user-info">
+                    <h6>
+                        {% for key, value in user_list.items %}
+                            {% if key == feedback.user_id %}
+                                {{ value }}
+                            {% endif %}
+                        {% endfor %}
+                    </h6>
+                    <small>User ID: {{ feedback.user_id }}</small>
+                </div>
+            </div>
+            
+            <div class="feedback-message">
+                "{{ feedback.msg }}"
+            </div>
+            
+            <div class="feedback-footer">
+                <span>
+                    <i class="bi bi-calendar me-1"></i>{{ feedback.dt }}
+                </span>
+                <span class="status-badge">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>
+                    {{ feedback.status }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <h5>No feedback messages yet</h5>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

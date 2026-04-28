@@ -1,0 +1,64 @@
+{% extends 'myapp/admin_base.html' %}
+{% load static %}
+
+{% block title %}Support Tickets{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark border-primary">
+                <div class="card-header bg-primary bg-opacity-10 border-primary d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-ticket me-2"></i>Support Tickets
+                    </h5>
+                    <span class="badge bg-primary">{{ tickets.count }} Total</span>
+                </div>
+                <div class="card-body">
+                    
+                    
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="ticketTabsContent">
+                        <!-- All Tickets Tab -->
+                        <div class="tab-pane fade show active" id="all" role="tabpanel">
+                            {% include 'myapp/admin_ticket_table.html' with tickets=tickets %}
+                        </div>
+                        
+                        <!-- Open Tickets Tab -->
+                        <div class="tab-pane fade" id="open" role="tabpanel">
+                            {% with open_tickets=tickets|dictsortreversed:"created_at" %}
+                                {% include 'myapp/admin_ticket_table.html' with tickets=open_tickets %}
+                            {% endwith %}
+                        </div>
+                        
+                        <!-- In Progress Tab -->
+                        <div class="tab-pane fade" id="inprogress" role="tabpanel">
+                            {% with inprogress_tickets=tickets|dictsortreversed:"created_at" %}
+                                {% include 'myapp/admin_ticket_table.html' with tickets=inprogress_tickets %}
+                            {% endwith %}
+                        </div>
+                        
+                        <!-- Resolved Tab -->
+                        <div class="tab-pane fade" id="resolved" role="tabpanel">
+                            {% with resolved_tickets=tickets|dictsortreversed:"created_at" %}
+                                {% include 'myapp/admin_ticket_table.html' with tickets=resolved_tickets %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} bg-{{ message.tags }} bg-opacity-10 border-{{ message.tags }} text-white position-fixed bottom-0 end-0 m-4" style="z-index: 9999;">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

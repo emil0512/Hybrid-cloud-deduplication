@@ -1,0 +1,235 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Admin Login - HybridCloud{% endblock %}
+
+{% block body %}
+<style>
+    .admin-login-container {
+        min-height: calc(100vh - 150px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .login-card {
+        background: rgba(10, 15, 31, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(45, 85, 255, 0.3);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .login-header {
+        padding: 2rem 2rem 1rem 2rem;
+        text-align: center;
+    }
+    
+    .login-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+    }
+    
+    .login-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .login-body {
+        padding: 1.5rem 2rem 2rem 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2d55ff;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(45, 85, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        color: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #2d55ff;
+        box-shadow: 0 0 0 3px rgba(45, 85, 255, 0.2);
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-login {
+        width: 100%;
+        background: linear-gradient(135deg, #2d55ff, #9333ea);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-login:hover {
+        opacity: 0.9;
+    }
+    
+    .btn-reset {
+        width: 100%;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(45, 85, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-reset:hover {
+        border-color: #2d55ff;
+        color: white;
+    }
+    
+    .error-message {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+        color: #dc3545;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    
+    .success-message {
+        background: rgba(40, 167, 69, 0.1);
+        border: 1px solid #28a745;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+        color: #28a745;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    
+    .back-link {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .back-link a {
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+    
+    .back-link a:hover {
+        color: #2d55ff;
+    }
+    
+    .back-link i {
+        margin-right: 0.3rem;
+    }
+</style>
+
+<div class="container">
+    <div class="admin-login-container">
+        <div class="row justify-content-center w-100">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                <div class="login-card">
+                    <!-- Header -->
+                    <div class="login-header">
+                        <h1>Admin Login</h1>
+                        <p>Enter your credentials to access admin panel</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <div class="login-body">
+                        <!-- Error Message -->
+                        {% if msg1 %}
+                            {% if 'success' in msg1 %}
+                                <div class="success-message">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    {{ msg1|safe }}
+                                </div>
+                            {% else %}
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    {{ msg1|safe }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <!-- FIXED: Form action points to admin_login -->
+                        <form method="post" action="{% url 'admin_login' %}">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="un">Username</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="un" 
+                                       id="un" 
+                                       placeholder="Enter username"
+                                       required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pwd">Password</label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       name="pwd" 
+                                       id="pwd" 
+                                       placeholder="Enter password"
+                                       required>
+                            </div>
+                            
+                            <button type="submit" class="btn-login" id="bt" name="bt">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                            
+                            <button type="reset" class="btn-reset" id="rt" name="rt">
+                                <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                            </button>
+                        </form>
+                        
+                        <!-- Back to Home Link -->
+                        <div class="back-link">
+                            <a href="{% url 'index' %}">
+                                <i class="bi bi-arrow-left"></i>
+                                Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

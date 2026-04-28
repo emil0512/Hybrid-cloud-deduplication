@@ -1,0 +1,538 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block body %}
+<style>
+    .profile-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .profile-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+    
+    .profile-avatar i {
+        font-size: 4rem;
+        color: #9333ea;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #9333ea;
+        font-weight: 500;
+    }
+    
+    .radio-group {
+        display: flex;
+        gap: 2rem;
+        padding: 0.5rem 0;
+    }
+    
+    .custom-radio {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .custom-radio input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #9333ea;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .error-message.show {
+        display: block;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+    }
+    
+    .success-text {
+        color: #28a745;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="container">
+    <div class="profile-container">
+        <h2 class="mb-4 text-center" data-aos="fade-up">
+            <i class="bi bi-person-circle me-2 text-primary"></i>My Profile
+        </h2>
+        
+        <div class="profile-card" data-aos="fade-up">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <h4 id="displayName">{{ up.fname }} {{ up.lname }}</h4>
+                <p class="text-white-50">Member since {{ up.dt|default:"N/A" }}</p>
+            </div>
+            
+            <form method="post" action="{% url 'user_details_update' %}" id="profileForm">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fname">
+                            <i class="bi bi-person me-1 text-primary"></i>First Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="fname" name="fname" 
+                               value="{{ up.fname }}" required>
+                        <div class="error-message" id="fnameError">First name is required</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lname">
+                            <i class="bi bi-person me-1 text-primary"></i>Last Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="lname" name="lname" 
+                               value="{{ up.lname }}" required>
+                        <div class="error-message" id="lnameError">Last name is required</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">
+                            <i class="bi bi-calendar me-1 text-primary"></i>Date of Birth
+                        </label>
+                        <input type="date" class="form-control" id="dob" name="dob" 
+                               value="{{ up.age }}">
+                        <div class="error-message" id="dobError">Please enter a valid date</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="bi bi-gender-ambiguous me-1 text-primary"></i>Gender <span class="text-danger">*</span>
+                        </label>
+                        <div class="radio-group">
+                            <label class="custom-radio">
+                                <input type="radio" name="gender" value="Male" 
+                                       {% if up.gender == 'Male' %}checked{% endif %}>
+                                <span>Male</span>
+                            </label>
+                            <label class="custom-radio">
+                                <input type="radio" name="gender" value="Female" 
+                                       {% if up.gender == 'Female' %}checked{% endif %}>
+                                <span>Female</span>
+                            </label>
+                        </div>
+                        <div class="error-message" id="genderError">Please select your gender</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="addr">
+                        <i class="bi bi-house me-1 text-primary"></i>Address
+                    </label>
+                    <input type="text" class="form-control" id="addr" name="addr" 
+                           value="{{ up.addr }}" placeholder="Street address">
+                    <div class="error-message" id="addrError">Address is required</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pin">
+                            <i class="bi bi-mailbox me-1 text-primary"></i>PIN Code
+                        </label>
+                        <input type="text" class="form-control" id="pin" name="pin" 
+                               value="{{ up.pin }}" placeholder="PIN code" maxlength="6">
+                        <div class="error-message" id="pinError">Please enter a valid 6-digit PIN code</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact">
+                            <i class="bi bi-phone me-1 text-primary"></i>Contact <span class="text-danger">*</span>
+                        </label>
+                        <input type="tel" class="form-control" id="contact" name="contact" 
+                               value="{{ up.contact }}" placeholder="Phone number" maxlength="10">
+                        <div class="error-message" id="contactError">Please enter a valid 10-digit mobile number</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">
+                        <i class="bi bi-envelope me-1 text-primary"></i>Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ up.email }}" required placeholder="Email address">
+                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span class="normal-state">
+                            <i class="bi bi-check-circle me-2"></i>Update Profile
+                        </span>
+                        <span class="loading-state d-none">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Updating...
+                        </span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="resetBtn">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Changes
+                    </button>
+                </div>
+            </form>
+            
+            {% if msg %}
+                <div class="alert alert-success mt-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {{ msg }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get form elements
+    const form = document.getElementById('profileForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    // Input fields
+    const fnameInput = document.getElementById('fname');
+    const lnameInput = document.getElementById('lname');
+    const dobInput = document.getElementById('dob');
+    const addrInput = document.getElementById('addr');
+    const pinInput = document.getElementById('pin');
+    const contactInput = document.getElementById('contact');
+    const emailInput = document.getElementById('email');
+    const genderRadios = document.querySelectorAll('input[name="gender"]');
+    
+    // Error elements
+    const fnameError = document.getElementById('fnameError');
+    const lnameError = document.getElementById('lnameError');
+    const dobError = document.getElementById('dobError');
+    const addrError = document.getElementById('addrError');
+    const pinError = document.getElementById('pinError');
+    const contactError = document.getElementById('contactError');
+    const emailError = document.getElementById('emailError');
+    const genderError = document.getElementById('genderError');
+    
+    const displayName = document.getElementById('displayName');
+    
+    // Validation functions
+    function validateFname() {
+        const value = fnameInput.value.trim();
+        if (value === '') {
+            fnameInput.classList.add('is-invalid');
+            fnameInput.classList.remove('is-valid');
+            fnameError.classList.add('show');
+            return false;
+        }
+        if (value.length < 2) {
+            fnameInput.classList.add('is-invalid');
+            fnameInput.classList.remove('is-valid');
+            fnameError.classList.add('show');
+            fnameError.textContent = 'First name must be at least 2 characters';
+            return false;
+        }
+        fnameInput.classList.remove('is-invalid');
+        fnameInput.classList.add('is-valid');
+        fnameError.classList.remove('show');
+        fnameError.textContent = 'First name is required';
+        return true;
+    }
+    
+    function validateLname() {
+        const value = lnameInput.value.trim();
+        if (value === '') {
+            lnameInput.classList.add('is-invalid');
+            lnameInput.classList.remove('is-valid');
+            lnameError.classList.add('show');
+            return false;
+        }
+        if (value.length < 2) {
+            lnameInput.classList.add('is-invalid');
+            lnameInput.classList.remove('is-valid');
+            lnameError.classList.add('show');
+            lnameError.textContent = 'Last name must be at least 2 characters';
+            return false;
+        }
+        lnameInput.classList.remove('is-invalid');
+        lnameInput.classList.add('is-valid');
+        lnameError.classList.remove('show');
+        lnameError.textContent = 'Last name is required';
+        return true;
+    }
+    
+    function validateDob() {
+        const value = dobInput.value;
+        if (value === '') {
+            dobInput.classList.remove('is-invalid');
+            dobInput.classList.remove('is-valid');
+            dobError.classList.remove('show');
+            return true; // Optional field
+        }
+        
+        const birthDate = new Date(value);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        if (age < 10 || age > 100) {
+            dobInput.classList.add('is-invalid');
+            dobInput.classList.remove('is-valid');
+            dobError.classList.add('show');
+            dobError.textContent = 'Please enter a valid age (10-100 years)';
+            return false;
+        }
+        
+        dobInput.classList.remove('is-invalid');
+        dobInput.classList.add('is-valid');
+        dobError.classList.remove('show');
+        return true;
+    }
+    
+    function validateAddr() {
+        const value = addrInput.value.trim();
+        if (value === '') {
+            addrInput.classList.remove('is-invalid');
+            addrInput.classList.remove('is-valid');
+            addrError.classList.remove('show');
+            return true; // Optional field
+        }
+        
+        if (value.length < 5) {
+            addrInput.classList.add('is-invalid');
+            addrInput.classList.remove('is-valid');
+            addrError.classList.add('show');
+            addrError.textContent = 'Please enter a complete address';
+            return false;
+        }
+        
+        addrInput.classList.remove('is-invalid');
+        addrInput.classList.add('is-valid');
+        addrError.classList.remove('show');
+        return true;
+    }
+    
+    function validatePin() {
+        const value = pinInput.value.trim();
+        if (value === '') {
+            pinInput.classList.remove('is-invalid');
+            pinInput.classList.remove('is-valid');
+            pinError.classList.remove('show');
+            return true; // Optional field
+        }
+        
+        const pinRegex = /^[1-9][0-9]{5}$/;
+        if (!pinRegex.test(value)) {
+            pinInput.classList.add('is-invalid');
+            pinInput.classList.remove('is-valid');
+            pinError.classList.add('show');
+            return false;
+        }
+        
+        pinInput.classList.remove('is-invalid');
+        pinInput.classList.add('is-valid');
+        pinError.classList.remove('show');
+        return true;
+    }
+    
+    function validateContact() {
+        const value = contactInput.value.trim();
+        if (value === '') {
+            contactInput.classList.add('is-invalid');
+            contactInput.classList.remove('is-valid');
+            contactError.classList.add('show');
+            contactError.textContent = 'Contact number is required';
+            return false;
+        }
+        
+        const phoneRegex = /^[6-9][0-9]{9}$/;
+        if (!phoneRegex.test(value)) {
+            contactInput.classList.add('is-invalid');
+            contactInput.classList.remove('is-valid');
+            contactError.classList.add('show');
+            contactError.textContent = 'Enter a valid 10-digit mobile number starting with 6-9';
+            return false;
+        }
+        
+        contactInput.classList.remove('is-invalid');
+        contactInput.classList.add('is-valid');
+        contactError.classList.remove('show');
+        return true;
+    }
+    
+    function validateEmail() {
+        const value = emailInput.value.trim();
+        if (value === '') {
+            emailInput.classList.add('is-invalid');
+            emailInput.classList.remove('is-valid');
+            emailError.classList.add('show');
+            emailError.textContent = 'Email is required';
+            return false;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            emailInput.classList.add('is-invalid');
+            emailInput.classList.remove('is-valid');
+            emailError.classList.add('show');
+            emailError.textContent = 'Enter a valid email address (e.g., name@example.com)';
+            return false;
+        }
+        
+        emailInput.classList.remove('is-invalid');
+        emailInput.classList.add('is-valid');
+        emailError.classList.remove('show');
+        return true;
+    }
+    
+    function validateGender() {
+        let selected = false;
+        genderRadios.forEach(radio => {
+            if (radio.checked) selected = true;
+        });
+        
+        if (!selected) {
+            genderError.classList.add('show');
+            return false;
+        }
+        
+        genderError.classList.remove('show');
+        return true;
+    }
+    
+    function updateDisplayName() {
+        const fname = fnameInput.value.trim();
+        const lname = lnameInput.value.trim();
+        if (fname || lname) {
+            displayName.textContent = `${fname} ${lname}`.trim();
+        }
+    }
+    
+    // Real-time validation
+    fnameInput.addEventListener('input', () => {
+        validateFname();
+        updateDisplayName();
+    });
+    
+    lnameInput.addEventListener('input', () => {
+        validateLname();
+        updateDisplayName();
+    });
+    
+    dobInput.addEventListener('change', validateDob);
+    addrInput.addEventListener('input', validateAddr);
+    pinInput.addEventListener('input', validatePin);
+    contactInput.addEventListener('input', validateContact);
+    emailInput.addEventListener('input', validateEmail);
+    genderRadios.forEach(radio => {
+        radio.addEventListener('change', validateGender);
+    });
+    
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+        form.reset();
+        fnameInput.classList.remove('is-invalid', 'is-valid');
+        lnameInput.classList.remove('is-invalid', 'is-valid');
+        dobInput.classList.remove('is-invalid', 'is-valid');
+        addrInput.classList.remove('is-invalid', 'is-valid');
+        pinInput.classList.remove('is-invalid', 'is-valid');
+        contactInput.classList.remove('is-invalid', 'is-valid');
+        emailInput.classList.remove('is-invalid', 'is-valid');
+        
+        // Reset display name to original
+        displayName.textContent = '{{ up.fname }} {{ up.lname }}';
+        
+        // Clear error messages
+        const errors = document.querySelectorAll('.error-message');
+        errors.forEach(error => error.classList.remove('show'));
+    });
+    
+    // Form submit validation
+    form.addEventListener('submit', function(e) {
+        const isFnameValid = validateFname();
+        const isLnameValid = validateLname();
+        const isDobValid = validateDob();
+        const isAddrValid = validateAddr();
+        const isPinValid = validatePin();
+        const isContactValid = validateContact();
+        const isEmailValid = validateEmail();
+        const isGenderValid = validateGender();
+        
+        if (!isFnameValid || !isLnameValid || !isDobValid || !isAddrValid || 
+            !isPinValid || !isContactValid || !isEmailValid || !isGenderValid) {
+            e.preventDefault();
+            
+            // Scroll to first error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.querySelector('.normal-state').classList.add('d-none');
+        submitBtn.querySelector('.loading-state').classList.remove('d-none');
+        submitBtn.disabled = true;
+    });
+    
+    // Initial validation
+    validateFname();
+    validateLname();
+    validateContact();
+    validateEmail();
+</script>
+{% endblock %}

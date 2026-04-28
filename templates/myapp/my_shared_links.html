@@ -1,0 +1,81 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}My Shared Links{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="bi bi-share-fill me-2"></i>My Shared Links</h4>
+            <small>Total active shares: {{ total_shares }}</small>
+        </div>
+        <div class="card-body">
+            {% if shared_links %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Link</th>
+                                <th>Expires</th>
+                                <th>Downloads</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for link in shared_links %}
+                            <tr>
+                                <td>{{ link.file_name }}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" 
+                                           value="{{ request.build_absolute_uri }}/../share/{{ link.token }}/" 
+                                           readonly size="30">
+                                </td>
+                                <td>
+                                    {% if link.expires_at %}
+                                        {{ link.expires_at|date:"Y-m-d" }}
+                                        {% if link.is_expired_status %}
+                                            <span class="badge bg-danger">Expired</span>
+                                        {% endif %}
+                                    {% else %}
+                                        Never
+                                    {% endif %}
+                                </td>
+                                <td>{{ link.current_downloads }}{% if link.max_downloads > 0 %} / {{ link.max_downloads }}{% endif %}</td>
+                                <td>
+                                    {% if link.is_active and not link.is_expired_status %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if link.is_active and not link.is_expired_status %}
+                                        <a href="{% url 'revoke_share_link' link.id %}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Revoke this share link?')">
+                                            <i class="bi bi-x-circle"></i> Revoke
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-share" style="font-size: 4rem; color: #6c757d;"></i>
+                    <h5 class="mt-3">No shared links yet</h5>
+                    <p class="text-muted">Go to My Files and click Share to create a shareable link.</p>
+                    <a href="{% url 'user_file_store_view' %}" class="btn btn-primary">
+                        <i class="bi bi-folder me-2"></i>Go to My Files
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

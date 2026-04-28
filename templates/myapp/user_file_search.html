@@ -1,0 +1,251 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}Search Files{% endblock %}
+
+{% block body %}
+<style>
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .search-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .search-box {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .search-box input {
+        padding-left: 45px;
+        height: 50px;
+        font-size: 1.1rem;
+    }
+    
+    .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9333ea;
+        font-size: 1.2rem;
+    }
+    
+    .search-box .clear-search {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.4);
+        cursor: pointer;
+        display: none;
+    }
+    
+    .search-box .clear-search:hover {
+        color: #dc3545;
+    }
+    
+    .search-results {
+        margin-top: 2rem;
+    }
+    
+    .result-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .result-item:hover {
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .result-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(147, 51, 234, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .result-icon i {
+        font-size: 1.2rem;
+        color: #9333ea;
+    }
+    
+    .result-info {
+        flex: 1;
+    }
+    
+    .result-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .result-meta {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .result-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-icon {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: rgba(147, 51, 234, 0.3);
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container">
+    <div class="search-container">
+        <h2 class="mb-4 text-center" data-aos="fade-up">
+            <i class="bi bi-search-heart-fill me-2 text-primary"></i>Search Files
+        </h2>
+        
+        <div class="search-card" data-aos="fade-up">
+            <form method="post" action="{% url 'user_file_search' %}" id="searchForm">
+                {% csrf_token %}
+                
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" 
+                           class="form-control" 
+                           name="query" 
+                           id="searchQuery"
+                           placeholder="Search by file name..."
+                           value="{{ search_query|default:'' }}"
+                           autocomplete="off">
+                    <span class="clear-search" onclick="clearSearch()">
+                        <i class="bi bi-x-circle"></i>
+                    </span>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search me-2"></i>Search
+                    </button>
+                    <button type="reset" class="btn btn-outline-primary" onclick="resetSearch()">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Search Results -->
+            <div class="search-results">
+                {% if file_list %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-files me-2 text-primary"></i>
+                            Found {{ file_list|length }} result(s)
+                        </h5>
+                        <a href="{% url 'user_file_store_view' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-folder me-1"></i>View All Files
+                        </a>
+                    </div>
+                    
+                    {% for fs in file_list %}
+                        <div class="result-item">
+                            <div class="result-icon">
+                                <i class="bi bi-file-earmark"></i>
+                            </div>
+                            <div class="result-info">
+                                <div class="result-name">{{ fs.file_name }}</div>
+                                <div class="result-meta">
+                                    {% for fi in fi_list %}
+                                        {% if fi.id == fs.file_id %}
+                                            {{ fi.file_size }} bytes • 
+                                        {% endif %}
+                                    {% endfor %}
+                                    Uploaded: {{ fs.dt }}
+                                </div>
+                            </div>
+                            <div class="result-actions">
+                                <a href="../user_file_store_download?id={{ fs.id }}" 
+                                   class="btn btn-success btn-icon" 
+                                   title="Download">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                <a href="../user_file_store_delete?id={{ fs.id }}" 
+                                   class="btn btn-danger btn-icon" 
+                                   title="Delete"
+                                   onclick="return confirm('Are you sure you want to delete this file?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% elif search_query %}
+                    <div class="no-results">
+                        <i class="bi bi-file-earmark-x"></i>
+                        <h4 class="text-white-50">No files found</h4>
+                        <p class="text-white-50">No results for "{{ search_query }}"</p>
+                        <a href="{% url 'user_file_store_view' %}" class="btn btn-outline-primary mt-3">
+                            <i class="bi bi-folder me-2"></i>Browse All Files
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="no-results">
+                        <i class="bi bi-search"></i>
+                        <h4 class="text-white-50">Search your files</h4>
+                        <p class="text-white-50">Enter a file name to start searching</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchQuery');
+    const clearBtn = document.querySelector('.clear-search');
+    
+    searchInput.addEventListener('input', function() {
+        clearBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+    });
+    
+    function clearSearch() {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        searchInput.focus();
+    }
+    
+    function resetSearch() {
+        clearSearch();
+        window.location.href = "{% url 'user_file_search' %}";
+    }
+    
+    // Show clear button on page load if there's a value
+    if (searchInput.value.length > 0) {
+        clearBtn.style.display = 'block';
+    }
+</script>
+{% endblock %}

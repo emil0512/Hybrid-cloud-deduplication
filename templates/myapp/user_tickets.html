@@ -1,0 +1,251 @@
+{% extends 'myapp/user_base.html' %}
+{% load static %}
+
+{% block title %}My Support Tickets{% endblock %}
+
+{% block body %}
+<style>
+    .tickets-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .tickets-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .ticket-card {
+        background: rgba(147, 51, 234, 0.05);
+        border: 1px solid rgba(147, 51, 234, 0.2);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .ticket-card:hover {
+        transform: translateX(5px);
+        border-color: #9333ea;
+        background: rgba(147, 51, 234, 0.1);
+    }
+    
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .ticket-id {
+        font-weight: 600;
+        color: #9333ea;
+    }
+    
+    .ticket-subject {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ticket-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .ticket-meta i {
+        margin-right: 0.3rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-open {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .status-progress {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+    
+    .status-resolved {
+        background: rgba(147, 51, 234, 0.2);
+        color: #9333ea;
+        border: 1px solid #9333ea;
+    }
+    
+    .status-closed {
+        background: rgba(108, 117, 125, 0.2);
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    
+    .priority-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .priority-high {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+    
+    .priority-medium {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+    
+    .priority-low {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        color: rgba(147, 51, 234, 0.3);
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background: transparent;
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: rgba(147, 51, 234, 0.2);
+        border-color: #9333ea;
+        color: #fff;
+    }
+</style>
+
+<div class="container">
+    <div class="tickets-container">
+        <!-- Header -->
+        <div class="tickets-header" data-aos="fade-up">
+            <h2 class="mb-0">
+                <i class="bi bi-ticket-fill me-2 text-primary"></i>My Support Tickets
+            </h2>
+            <a href="{% url 'user_create_ticket' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>New Ticket
+            </a>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar" data-aos="fade-up">
+            <button class="filter-btn active" onclick="filterTickets('all')">All</button>
+            <button class="filter-btn" onclick="filterTickets('open')">Open</button>
+            <button class="filter-btn" onclick="filterTickets('in_progress')">In Progress</button>
+            <button class="filter-btn" onclick="filterTickets('resolved')">Resolved</button>
+            <button class="filter-btn" onclick="filterTickets('closed')">Closed</button>
+        </div>
+        
+        <!-- Tickets List -->
+        <div data-aos="fade-up">
+            {% if tickets %}
+                {% for ticket in tickets %}
+                    <div class="ticket-card" onclick="location.href='{% url 'user_ticket_detail' ticket.id %}'" data-status="{{ ticket.status }}">
+                        <div class="ticket-header">
+                            <span class="ticket-id">#{{ ticket.id }}</span>
+                            <span class="status-badge 
+                                {% if ticket.status == 'open' %}status-open
+                                {% elif ticket.status == 'in_progress' %}status-progress
+                                {% elif ticket.status == 'resolved' %}status-resolved
+                                {% else %}status-closed{% endif %}">
+                                {{ ticket.status|title }}
+                            </span>
+                        </div>
+                        
+                        <div class="ticket-subject">{{ ticket.subject }}</div>
+                        
+                        <div class="ticket-meta">
+                            <span>
+                                <i class="bi bi-tag"></i>
+                                {{ ticket.issue_type|title }}
+                            </span>
+                            <span>
+                                <span class="priority-badge 
+                                    {% if ticket.priority == 'high' %}priority-high
+                                    {% elif ticket.priority == 'medium' %}priority-medium
+                                    {% else %}priority-low{% endif %}">
+                                    {{ ticket.priority|title }}
+                                </span>
+                            </span>
+                            <span>
+                                <i class="bi bi-clock"></i>
+                                {{ ticket.created_at|date:"Y-m-d H:i" }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-ticket"></i>
+                    <h4 class="text-white-50">No Support Tickets</h4>
+                    <p class="text-white-50">You haven't created any support tickets yet.</p>
+                    <a href="{% url 'user_create_ticket' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Create Ticket
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterTickets(status) {
+        const tickets = document.querySelectorAll('.ticket-card');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent.toLowerCase().includes(status) || 
+                (status === 'all' && btn.textContent.toLowerCase() === 'all')) {
+                btn.classList.add('active');
+            }
+        });
+        
+        tickets.forEach(ticket => {
+            if (status === 'all') {
+                ticket.style.display = 'block';
+            } else {
+                ticket.style.display = ticket.dataset.status === status ? 'block' : 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

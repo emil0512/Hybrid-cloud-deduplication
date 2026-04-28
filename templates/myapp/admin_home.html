@@ -1,0 +1,565 @@
+{% extends 'myapp/admin_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block body %}
+<style>
+    .welcome-section {
+        margin-bottom: 2rem;
+    }
+    
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #fff, #2d55ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .welcome-text {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #2d55ff, #9333ea);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: #2d55ff;
+        box-shadow: 0 20px 40px rgba(45, 85, 255, 0.2);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, rgba(45, 85, 255, 0.2), rgba(147, 51, 234, 0.2));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon i {
+        font-size: 1.5rem;
+        color: #2d55ff;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #fff;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stat-change {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-size: 0.85rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+    }
+    
+    .change-positive {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .change-negative {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+    
+    .chart-container {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        height: 300px;
+    }
+    
+    .recent-activities {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(45, 85, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-item:hover {
+        background: rgba(45, 85, 255, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(45, 85, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .activity-icon i {
+        font-size: 1.2rem;
+        color: #2d55ff;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .activity-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-action-card {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        border-color: #2d55ff;
+        background: rgba(45, 85, 255, 0.1);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .quick-action-card i {
+        font-size: 2rem;
+        color: #2d55ff;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-action-card h5 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-action-card p {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    .system-status {
+        background: rgba(45, 85, 255, 0.05);
+        border: 1px solid rgba(45, 85, 255, 0.2);
+        border-radius: 20px;
+        padding: 1.5rem;
+    }
+    
+    .status-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(45, 85, 255, 0.1);
+    }
+    
+    .status-item:last-child {
+        border-bottom: none;
+    }
+    
+    .status-label {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .status-value {
+        font-weight: 600;
+    }
+    
+    .status-value i {
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+    }
+    
+    .table-responsive {
+        margin-bottom: 2rem;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .bg-warning { background: rgba(255, 193, 7, 0.2) !important; color: #ffc107; border: 1px solid #ffc107; }
+    .bg-info { background: rgba(23, 162, 184, 0.2) !important; color: #17a2b8; border: 1px solid #17a2b8; }
+    .bg-success { background: rgba(40, 167, 69, 0.2) !important; color: #28a745; border: 1px solid #28a745; }
+    .bg-danger { background: rgba(220, 53, 69, 0.2) !important; color: #dc3545; border: 1px solid #dc3545; }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .loading-spinner.active {
+        display: block;
+    }
+    
+    #recent-activities-list {
+        min-height: 200px;
+    }
+</style>
+
+<!-- Welcome Section -->
+<div class="welcome-section" data-aos="fade-up">
+    <h1 class="welcome-title">
+        <i class="bi bi-shield-shaded me-2"></i>Welcome back, {{ request.session.user_name|default:"Admin" }}
+    </h1>
+    <p class="welcome-text">
+        Here's what's happening with your cloud platform today. Last updated: <span id="dashboard-last-update"></span>
+    </p>
+</div>
+
+<!-- Statistics Grid -->
+<div class="stats-grid" id="stats-container">
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-icon">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-value total-users">{{ total_users|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-change change-positive">
+            <i class="bi bi-arrow-up"></i> +12% this month
+        </div>
+    </div>
+    
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat-icon">
+            <i class="bi bi-files"></i>
+        </div>
+        <div class="stat-value total-files">{{ total_files|default:"0" }}</div>
+        <div class="stat-label">Total Files</div>
+        <div class="stat-change change-positive">
+            <i class="bi bi-arrow-up"></i> +8% this week
+        </div>
+    </div>
+    
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat-icon">
+            <i class="bi bi-database"></i>
+        </div>
+        <div class="stat-value storage-used">{{ storage_used|default:"0" }} GB</div>
+        <div class="stat-label">Storage Used</div>
+        <div class="stat-change change-positive">
+            <i class="bi bi-arrow-up"></i> of 1TB total
+        </div>
+    </div>
+    
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+        <div class="stat-icon">
+            <i class="bi bi-ticket"></i>
+        </div>
+        <div class="stat-value open-tickets">{{ open_tickets|default:"0" }}</div>
+        <div class="stat-label">Open Tickets</div>
+        <div class="stat-change {% if open_tickets > 5 %}change-negative{% else %}change-positive{% endif %}">
+            <i class="bi bi-{% if open_tickets > 5 %}arrow-up{% else %}arrow-down{% endif %}"></i> 
+            {% if open_tickets > 5 %}High priority{% else %}Normal{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="chart-container" data-aos="fade-up">
+            <h5 class="mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>User Activity (Last 7 Days)</h5>
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="chart-container" data-aos="fade-up">
+            <h5 class="mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Storage Distribution</h5>
+            <canvas id="storageChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<!-- Quick Actions -->
+<h4 class="mb-3 mt-4" data-aos="fade-up"><i class="bi bi-lightning-charge me-2 text-primary"></i>Quick Actions</h4>
+<div class="quick-actions">
+    <a href="{% url 'admin_user_view' %}" class="quick-action-card" data-aos="fade-up" data-aos-delay="100">
+        <i class="bi bi-person-plus"></i>
+        <h5>Manage Users</h5>
+        <p>View and manage users</p>
+    </a>
+    
+    <a href="{% url 'admin_support_tickets' %}" class="quick-action-card" data-aos="fade-up" data-aos-delay="200">
+        <i class="bi bi-ticket-perforated"></i>
+        <h5>Manage Tickets</h5>
+        <p>{{ open_tickets|default:"0" }} pending tickets</p>
+    </a>
+    
+    <a href="{% url 'admin_user_feedback_view' %}" class="quick-action-card" data-aos="fade-up" data-aos-delay="300">
+        <i class="bi bi-chat-dots"></i>
+        <h5>View Feedback</h5>
+        <p>{{ new_feedback|default:"0" }} new feedback</p>
+    </a>
+    
+    <a href="#" class="quick-action-card" onclick="openChangePasswordModal(); return false;" data-aos="fade-up" data-aos-delay="400">
+        <i class="bi bi-shield-lock"></i>
+        <h5>Security</h5>
+        <p>Update password</p>
+    </a>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner">
+    <div class="custom-spinner"></div>
+    <p class="mt-3 text-white-50">Updating dashboard...</p>
+</div>
+
+<script>
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activity Chart
+        const ctx1 = document.getElementById('activityChart')?.getContext('2d');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Active Users',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        borderColor: '#2d55ff',
+                        backgroundColor: 'rgba(45, 85, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'File Uploads',
+                        data: [28, 48, 40, 19, 86, 27, 90],
+                        borderColor: '#9333ea',
+                        backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'white' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'white' } }
+                    }
+                }
+            });
+        }
+        
+        // Storage Chart
+        const storageUsed = {{ storage_used|default:0 }};
+        const storageFree = {{ storage_free|default:100 }};
+        
+        const ctx2 = document.getElementById('storageChart')?.getContext('2d');
+        if (ctx2) {
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used Storage', 'Free Storage'],
+                    datasets: [{
+                        data: [storageUsed, storageFree],
+                        backgroundColor: ['#2d55ff', 'rgba(45, 85, 255, 0.2)'],
+                        borderColor: ['#2d55ff', 'rgba(45, 85, 255, 0.2)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update dashboard last update time
+        updateDashboardTime();
+    });
+    
+    function updateDashboardTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString();
+        document.getElementById('dashboard-last-update').textContent = timeString;
+    }
+    
+    // Auto-refresh dashboard data
+    $(document).on('refreshData', function() {
+        $('#loadingSpinner').addClass('active');
+        
+        $.ajax({
+            url: '{% url "get_dashboard_stats" %}',
+            method: 'GET',
+            timeout: 10000,
+            success: function(data) {
+                // Update stats
+                $('.total-users').text(data.total_users);
+                $('.total-files').text(data.total_files);
+                $('.storage-used').text(data.storage_used + ' GB');
+                $('.open-tickets').text(data.open_tickets);
+                
+                // Update recent activities
+                if (data.recent_activities && data.recent_activities.length > 0) {
+                    updateRecentActivities(data.recent_activities);
+                } else {
+                    $('#recent-activities-list').html('<div class="text-center text-white-50 py-4">No recent activities</div>');
+                }
+                
+                updateDashboardTime();
+                $('#loadingSpinner').removeClass('active');
+            },
+            error: function(xhr, status, error) {
+                console.error('Error refreshing dashboard:', error);
+                $('#loadingSpinner').removeClass('active');
+                $('#recent-activities-list').html('<div class="text-center text-white-50 py-4">Error loading activities. Please refresh.</div>');
+            }
+        });
+    });
+    
+    function updateRecentActivities(activities) {
+        const container = $('#recent-activities-list');
+        container.empty();
+        
+        activities.forEach(function(activity) {
+            const icon = getActivityIcon(activity.type);
+            const badgeClass = getActivityBadgeClass(activity.type);
+            const badgeText = activity.type.charAt(0).toUpperCase() + activity.type.slice(1);
+            
+            const item = `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="bi ${icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time"><i class="bi bi-clock me-1"></i>${activity.time || 'Just now'}</div>
+                    </div>
+                    <span class="badge ${badgeClass} activity-badge">${badgeText}</span>
+                </div>
+            `;
+            
+            container.append(item);
+        });
+    }
+    
+    function getActivityIcon(type) {
+        const icons = {
+            'user': 'bi-person',
+            'file': 'bi-file-earmark',
+            'ticket': 'bi-ticket',
+            'feedback': 'bi-star',
+            'system': 'bi-shield-check'
+        };
+        return icons[type] || 'bi-info-circle';
+    }
+    
+    function getActivityBadgeClass(type) {
+        const classes = {
+            'user': 'bg-success',
+            'file': 'bg-info',
+            'ticket': 'bg-warning',
+            'feedback': 'bg-success',
+            'system': 'bg-info'
+        };
+        return classes[type] || 'bg-primary';
+    }
+</script>
+{% endblock %}
