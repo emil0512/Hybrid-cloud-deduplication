@@ -114,6 +114,8 @@ Stores Encrypted File Data Only:
 - Quota is tracked in `storage_details` table
 - Files are deduplicated - same file uploaded by multiple users counts once
 
+📸 Screenshots: Check the [`/screenshots`](screenshots/) folder for all website screenshots
+
 ## 🚀 How to Run Locally
 
 ```bash
@@ -146,4 +148,4 @@ Integration with AWS S3 instead of ownCloud
 
 Password hashing (security improvement)
 
-📸 **Screenshots:** Check the [`/screenshots`](screenshots/) folder for all website screenshots
+
