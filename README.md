@@ -115,7 +115,8 @@ Stores Encrypted File Data Only:
 - Files are deduplicated - same file uploaded by multiple users counts once
 
 📸 Screenshots: Check the [`/screenshots`](screenshots/) folder for all website screenshots
-**Video Demo:** [Watch demo](ScreenRecording2026-04-28211430.mp4)
+
+Video Demo:[Watch demo](Screen Recording 2026-04-28211430.mp4)
 
 ## 🚀 How to Run Locally
 
