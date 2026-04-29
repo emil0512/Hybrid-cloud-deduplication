@@ -146,3 +146,4 @@ Integration with AWS S3 instead of ownCloud
 
 Password hashing (security improvement)
 
+📸 **Screenshots:** Check the [`/screenshots`](screenshots/) folder for all website screenshots
